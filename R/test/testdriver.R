@@ -1,0 +1,5 @@
+require(nativesupport)
+require(emre)
+require(RUnit)
+RequireInitGoogle()
+RunUnitTests()

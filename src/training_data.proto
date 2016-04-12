@@ -1,0 +1,99 @@
+// Copyright 2012-2016 Google
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+import "storage/datapol/annotations/proto/semantic_annotations.proto";
+option cc_api_version = 2;
+option (datapol.file_vetting_status) = "latest";
+
+package emre;
+
+// Next tag: 8.
+// This proto will hold the components in mixture priors
+message PriorComponent {
+  optional double probability = 1 [default = 1.0];
+
+  // These are prior parameters in a Gamma-Poisson model.
+  optional double gamma_alpha = 2;
+  optional double gamma_beta = 3;
+
+  // For a grid model there is an optional 'scale' parameter associated with
+  // each grid point.  This scale parameter is not fitted by any current
+  // implementations
+  optional double location = 4 [default = 1.0];
+  optional double scale = 5;
+
+  // These are prior parameters in a Gaussian model.  The default value of 0.0
+  // for the mean is acceptable.
+  optional double mean = 6;
+  optional double inverse_variance = 7;
+};
+
+// Next tag: 12.
+message FeatureFamilyPrior {
+  enum ModelClassType {
+    POISSON = 0;
+    GAUSSIAN = 1;
+    SCALED_POISSON = 2;
+    LOGNORMAL_POISSON = 3;
+  }
+
+  enum PriorUpdateType {
+    SAMPLE = 0;
+    RAO_BLACKWELLIZED = 1;
+    INTEGRATED = 2;
+    GIBBS_INTEGRATED = 3;
+    MIXTURE = 4;
+    SPIKE = 5;
+    SAMPLE_FOR_SCALED = 6;
+    INVALID_UPDATE_TYPE = 100;
+    DONT_UPDATE = 999;
+  }
+
+  enum RanefUpdateType {
+    GIBBS_SAMPLED = 0;
+    OPTIMIZED = 1;
+  }
+
+  optional string feature_family = 1;
+
+  // These are prior parameters in a Gaussian and scaled Poisson model.
+  // The default value of 0.0 for the mean is acceptable.
+  // Maybe these parameters should just exist in the PriorComponent
+  optional double mean = 2;
+  optional double inverse_variance = 3;
+
+  // In a 'spike' prior there is an atom at zero (perhaps in log scale) that
+  // has this probability.  This 'spike' introduces sparsity in the posterior.
+  optional double spike_probability = 4;
+
+  // If the prior is a mixture, the components and their weights are held here
+  repeated PriorComponent mixture_components = 5;
+  // update spike or mixture component parameters
+  optional bool update_component_parameters = 6 [default = true];
+
+  optional ModelClassType model_class_type = 7 [default = POISSON];
+  // This prior update type is not completely mutual exclusive with the
+  // model class type, i.e. SCALED_POISSON doesn't have an INTEGRATED prior
+  // update type.
+  optional PriorUpdateType prior_update_type = 8 [default = INTEGRATED];
+  optional RanefUpdateType ranef_update_type = 9 [default = GIBBS_SAMPLED];
+
+  // Is only used if actually set
+  optional double default_score = 10;
+
+  // If this is supplied and the family has more than this number of levels, the
+  // updater _may_ filter to a subset of this size as a performance
+  // optimization.  A value <= 0 means that all levels should be used.
+  optional int32 max_levels_for_update = 11;
+};

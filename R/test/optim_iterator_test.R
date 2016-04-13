@@ -121,14 +121,14 @@ TestIsDoneOptimIterator <- function() {
   checkTrue(it$is.done())
 }
 
-TestIteratorInSetupOptim <- function() {
+TestIteratorInSetupEMREoptim <- function() {
   # Fits a Gamma prior on simulated data.
   kFamilyNames <- c("__bias__", "1__x.1", "1__x.2", "1__x.3")
   set.seed(15)
   r <- .GenerateModelData()
 
   # Gibbs sample ranefs
-  mdl <- SetupOptim(
+  mdl <- SetupEMREoptim(
       "y ~ 1 + (1|x.1) + (1|x.2) + (1|x.3) + offset(n)",
       data = r$dat, model.constructor = PoissonEMRE)
 
@@ -177,14 +177,14 @@ TestIteratorInSetupOptim <- function() {
   }
 }
 
-TestUpdateModesInSetupOptim <- function() {
+TestUpdateModesInSetupEMREoptim <- function() {
   # Fits a Gamma prior on simulated data.
   kFamilyNames <- c("__bias__", "1__x.1", "1__x.2", "1__x.3")
   set.seed(15)
   r <- .GenerateModelData()
 
   # fully bayesian inference
-  mdl1 <- SetupOptim(
+  mdl1 <- SetupEMREoptim(
       "y ~ 1 + (1|x.1) + (1|x.2) + (1|x.3) + offset(n)",
       data = r$dat, model.constructor = PoissonEMRE, update.mode = "full.bayes")
 
@@ -204,7 +204,7 @@ TestUpdateModesInSetupOptim <- function() {
   }
 
   # fixed prior, gibbs sample ranefs
-  mdl2 <- SetupOptim(
+  mdl2 <- SetupEMREoptim(
     "y ~ 1 + (1|x.1) + (1|x.2) + (1|x.3) + offset(n)",
     data = r$dat, model.constructor = PoissonEMRE,
     update.mode = "fixed.prior.sample")
@@ -224,7 +224,7 @@ TestUpdateModesInSetupOptim <- function() {
   }
 
   # fixed prior, optimize ranefs MAP, everything is a fixed effect!
-  mdl3 <- SetupOptim(
+  mdl3 <- SetupEMREoptim(
     "y ~ 1 + (1|x.1) + (1|x.2) + (1|x.3) + offset(n)",
     data = r$dat, model.constructor = PoissonEMRE,
     update.mode = "fixed.prior.map")
@@ -249,7 +249,7 @@ TestFixedPriorMAPinInterleavedFit <- function() {
                                group.sds = c(0.6, 0.1),
                                feature.name = "w")
 
-  mdl1 <- SetupOptim(
+  mdl1 <- SetupEMREoptim(
       "y ~ 1 + (1|x.1) + (1|x.2) + (1|x.3) + offset(n)",
       data = model1$dat, model.constructor = PoissonEMRE,
       update.mode = "fixed.prior.map",
@@ -258,7 +258,7 @@ TestFixedPriorMAPinInterleavedFit <- function() {
   mdl1 <- FitEMRE(mdl1, max.iter = 30, debug = TRUE)
 
   # this model must not interfere with model 1!
-  mdl2 <- SetupOptim(
+  mdl2 <- SetupEMREoptim(
       "y ~ 1 + (1|w.1) + (1|w.2) + offset(n)",
       data = model2$dat, model.constructor = PoissonEMRE,
       thinning.interval = 10L)
@@ -276,7 +276,7 @@ TestFixedPriorMAPinInterleavedFit <- function() {
 
   # compare with a single run
   # TODO(kuehnelf): eliminate optim.iter from the settings
-  mdl1.single.run <- SetupOptim(
+  mdl1.single.run <- SetupEMREoptim(
       "y ~ 1 + (1|x.1) + (1|x.2) + (1|x.3) + offset(n)",
       data = model1$dat, model.constructor = PoissonEMRE,
       update.mode = "fixed.prior.map")
@@ -319,14 +319,14 @@ TestEmpiricalBayesInInterleavedFit <- function() {
   model2 <- .GenerateModelData(group.sizes = c(1000, 500),
                                group.sds = c(0.6, 0.1))
 
-  mdl1 <- SetupOptim(
+  mdl1 <- SetupEMREoptim(
       "y ~ 1 + (1|x.1) + (1|x.2) + (1|x.3) + offset(n)",
       data = model1$dat, model.constructor = PoissonEMRE,
       thinning.interval = 5L, debug = TRUE)
   print("fitting gamma-poisson for model 1")
   mdl1 <- FitEMRE(mdl1, max.iter = 30)
 
-  mdl2 <- SetupOptim(
+  mdl2 <- SetupEMREoptim(
       "y ~ 1 + (1|x.1) + (1|x.2) + offset(n)",
       data = model2$dat, model.constructor = PoissonEMRE,
       thinning.interval = 5L, debug = TRUE)
@@ -342,7 +342,7 @@ TestEmpiricalBayesInInterleavedFit <- function() {
   }
 
   # compare with a single run
-  mdl1.single.run <- SetupOptim(
+  mdl1.single.run <- SetupEMREoptim(
       "y ~ 1 + (1|x.1) + (1|x.2) + (1|x.3) + offset(n)",
       data = model1$dat, model.constructor = PoissonEMRE,
       thinning.interval = 10L)

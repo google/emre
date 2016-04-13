@@ -13,8 +13,8 @@
 
 #include "poisson_feature_processor.h"  // NOLINT
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/base/logging.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/indexers/memory_vector.h"
+#include "base/logging.h"
+#include "indexers/memory_vector.h"
 #include "scaled_feature_util.h"  // NOLINT
 
 namespace emre {
@@ -94,7 +94,7 @@ void PoissonScaledFeatureProcessor::GetStatsForUpdateScaledPoissonImpl(
     MutableArraySlice<double> prediction) {
   CHECK_EQ(index, cached_index_);
   const int output_size = aggregate_scaling_.size();
-  CHECK(prediction.size() >= output_size);
+  CHECK_GE(prediction.size(), output_size);
 
   ScaledFeatureUtil::GetPredictionForPoissonUpdate(
       index, level_scaling_posn_.get(), coefficients, p_events, prediction);

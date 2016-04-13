@@ -70,12 +70,12 @@ TestGaussianRandomEffect <- function() {
   checkTrue(min(abs(old.p.events - p.events)) > 1e-6)
 }
 
-TestGaussianSetupOptim <- function() {
+TestGaussianSetupEMREoptim <- function() {
   kFamilyNames <- c("__bias__", "1__x.1", "1__x.2", "1__x.3")
   set.seed(15)
   r <- .GenerateGaussianModelData()
 
-  mdl <- SetupOptim(
+  mdl <- SetupEMREoptim(
       "y ~ 1 + (1|x.1, sd = 0.5) + (1|x.2) + (1|x.3) + stddev(noise.sd)",
       data = r$dat, model.constructor = GaussianEMRE)
 
@@ -129,7 +129,7 @@ TestFitGaussianFullBayes <- function() {
   set.seed(15)
   r <- .GenerateGaussianModelData()
 
-  mdl <- SetupOptim(
+  mdl <- SetupEMREoptim(
     "y ~ 1 + (1|x.1) + (1|x.2) + (1|x.3) + stddev(noise.sd)",
     data = r$dat, model.constructor = GaussianEMRE,
     update.mode = "full.bayes", burnin = 20, thinning.interval = 5)
@@ -166,7 +166,7 @@ TestFitGaussianEmpiricalBayes <- function() {
   set.seed(15)
   r <- .GenerateGaussianModelData()
 
-  mdl <- SetupOptim(
+  mdl <- SetupEMREoptim(
     "y ~ 1 + (1|x.1) + (1|x.2) + (1|x.3) + stddev(noise.sd)",
     data = r$dat, model.constructor = GaussianEMRE,
     update.mode = "empirical.bayes", burnin = 20, thinning.interval = 5)

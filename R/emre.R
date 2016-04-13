@@ -192,10 +192,10 @@ GaussianEMRE <- function() {
   return(mdl)
 }
 
-SetupOptim <- function(formula.str, data = NULL, data.files = NULL,
-                       data.reader.callback = NULL,
-                       iterator.class = OptimIterator,
-                       model.constructor = EMRE, ...) {
+SetupEMREoptim <- function(formula.str, data = NULL, data.files = NULL,
+                           data.reader.callback = NULL,
+                           iterator.class = OptimIterator,
+                           model.constructor = PoissonEMRE, ...) {
   # Fits the variances/regularization using the Monte Carlo EM algorithm (MCEM).
   #
   # Args:
@@ -206,7 +206,7 @@ SetupOptim <- function(formula.str, data = NULL, data.files = NULL,
   #   data.reader.callback: callback function that takes a file name as an
   #     argument and returns a data frame. The default is 'read.table'
   #   model.constructor: a sub-class of the model constructor, i.e.
-  #     EMRE, GaussianEMRE,...
+  #     PoissonEMRE, GaussianEMRE,...
   #   max.iter: integer (default 190) to stop gibbs sampling at this iteration
   #   skip.read.errors: boolean (default FALSE). If TRUE, errors reading input
   #     data will be skipped and model fitting will continue.

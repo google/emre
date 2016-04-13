@@ -15,8 +15,8 @@
 
 #include <algorithm>
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/base/logging.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/emre_util.h"
+#include "base/logging.h"
+#include "util/emre_util.h"
 #include "gsl/gsl_sf_gamma.h"
 #include "gsl/gsl_sf_psi.h"
 #include "likelihoods.h"  // NOLINT

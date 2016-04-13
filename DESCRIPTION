@@ -1,17 +1,17 @@
 Package: emre
 Type: Package
 Title: Mixed Effects with blocked Gibbs sampling
-Version: 0.0.1
+Version: 1.0.0
 Date: 2016-01-25
-Author: Frank Kuehnel <kuehnelf@google.com>
+Author: Frank Kuehnel <kuehnelf@google.com>, Nicholas Johnson <naj@google.com>
 Maintainer: Frank Kuehnel <kuehnelf@google.com>
-Description: Large scale GLM model fitting using Gibbs MCEM sampling.
-License: Google
+Description: Large scale Gaussian & Poisson model fitting using Gibbs sampling.
+License: Apache 2
 LicenseNote: What?
 Depends: R (>= 2.15.1), Rcpp (>= 0.9.10), R6 (>= 2.1.2)
 LinkingTo: Rcpp
 Suggests: RUnit
-URL: http://whatever.org
+URL: https://github.com/google/emre
 Collate:
   zzz.R
   indexer_utils.R

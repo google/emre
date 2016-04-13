@@ -1,5 +1,3 @@
-
-
 RandomEffect <- R6Class("RandomEffect",
   cloneable = FALSE,
   public = list(
@@ -126,6 +124,15 @@ ScaledRandomEffect <- R6Class("ScaledRandomEffect",
       private$updater <- .CreateScaledPoissonRanefUpdater(prior, index.reader)
       EmreDebugPrint("... intialized")
       self$coefficients <- rep(0.0, num.levels)
+    },
+
+    calc.immutable.stats = function(response = response,
+                                    offset = offset) {
+      # TODO(kuehnelf):
+      # we must take into account the unique level scaling map!
+      stop(paste("Poisson models only support formulas of the form '(1 | re)'.",
+                 "Terms of the form '(0+x|re)' will be supported",
+                 "in future versions."))
     },
 
     update.coefficients = function(p.events) {

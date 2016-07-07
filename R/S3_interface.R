@@ -6,4 +6,5 @@ suppressWarnings({
   GetFamilyNames <- function(x, ...) UseMethod("GetFamilyNames")
   GetRanefs <- function(x, ...) UseMethod("GetRanefs")
   GetPrior <- function(x, ...) UseMethod("GetPrior")
+  GetResidualVariance <- function(x, ...) UseMethod("GetResidualVariance")
 })  # NOLINT

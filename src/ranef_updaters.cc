@@ -21,15 +21,15 @@
 
 #include <vector>
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/parameter_updater/gaussian_feature_processor.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/parameter_updater/poisson_feature_processor.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/prior_updater/gamma_prior_optimize.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/prior_updater/gaussian_prior_optimize.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/ranef_updater/poisson_block_relaxation.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/ranef_updater/gaussian_block_relaxation.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/ranef_updater/scaled_poisson_block_relaxation.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/arrayslice.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/distribution.h"
+#include "parameter_updater/gaussian_feature_processor.h"
+#include "parameter_updater/poisson_feature_processor.h"
+#include "prior_updater/gamma_prior_optimize.h"
+#include "prior_updater/gaussian_prior_optimize.h"
+#include "ranef_updater/poisson_block_relaxation.h"
+#include "ranef_updater/gaussian_block_relaxation.h"
+#include "ranef_updater/scaled_poisson_block_relaxation.h"
+#include "util/arrayslice.h"
+#include "util/distribution.h"
 #include "net/proto2/public/text_format.h"
 
 // We export functions into R with lowercase and underscores.

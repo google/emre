@@ -401,7 +401,7 @@ void GammaPoissonPriorUpdater::SetProtoFromPrior(FeatureFamilyPrior* pb) const {
   CHECK_NOTNULL(pb);
   CHECK_GT(alpha_, 0.0);
   CHECK_GT(beta_, 0.0);
-  pb->set_inverse_variance(beta_  * beta_ / alpha_);
+  pb->set_inverse_variance(beta_ * beta_ / alpha_);
   pb->set_mean(alpha_ / beta_);
   pb->set_max_levels_for_update(max_levels_for_update_);
 }

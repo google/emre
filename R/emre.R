@@ -7,8 +7,6 @@
 # library(emre)
 # r <- VarianceUpdateExample()
 
-library(RProtoBuf)
-
 PoissonEMRE <- function() {
   # The objects whose constructors are listed in 'feature.constructors' are
   # stored in predictors[[i]]$predictor
@@ -20,12 +18,14 @@ PoissonEMRE <- function() {
             # The parameters in these feature classes have precedence over
             # the ones below.
             setup = list(
+                iterator.class = OptimIterator,
                 start.iter = 0L,
                 thinning.interval = 500L,  # intervals between taking samples
                 burnin = 19L,
                 # TODO(kuehnelf): set to full.bayes as a default
                 update.mode = "empirical.bayes",
                 max.iter = 0L,  # this will be set in FitEMRE
+                llik.interval = 0L,  # non-zero value will calc llik per iter
                 debug = FALSE),
             # TODO(kuehnelf): Terms in the formula string are recognized in
             # order of the elements in the feature.constructors list.
@@ -35,15 +35,17 @@ PoissonEMRE <- function() {
                 InterceptTerm = InterceptTerm,
                 RanefTerm = RanefTerm,
                 ScaledRanefTerm = ScaledPoissonTerm,
+                OffsetTerm = LogOffsetTerm,
                 OffsetTerm = OffsetTerm,
                 FixefTerm = FixefTerm))
-  class(r) <- "EMRE"
+  class(r) <- c("EMRE", "PoissonEMRE")
   return(r)
 }
 
 GaussianEMRE <- function() {
   EmreDebugPrint("calling GaussianEMRE")
   r <- PoissonEMRE()
+  r$setup$iterator.class <- GaussOptimIterator
   r$model.family <- "gaussian"
   r$feature.constructors = list(
       InterceptTerm = GaussianInterceptTerm,
@@ -51,6 +53,7 @@ GaussianEMRE <- function() {
       ScaledRanefTerm = ScaledGaussianTerm,
       OffsetTerm = GaussianNoiseVarianceTerm,
       FixedEffect = GaussianFixefTerm)
+  class(r) <- c(class(r), "GaussianEMRE")
   return(r)
 }
 
@@ -194,7 +197,6 @@ GaussianEMRE <- function() {
 
 SetupEMREoptim <- function(formula.str, data = NULL, data.files = NULL,
                            data.reader.callback = NULL,
-                           iterator.class = OptimIterator,
                            model.constructor = PoissonEMRE, ...) {
   # Fits the variances/regularization using the Monte Carlo EM algorithm (MCEM).
   #
@@ -237,8 +239,11 @@ SetupEMREoptim <- function(formula.str, data = NULL, data.files = NULL,
             !is.null(mdl$observation$response))
 
   # set up a basic optim iterator
-  mdl$optim.iterator <- iterator.class$new(mdl$observation$offset,
-                                           max.iter = mdl$setup$max.iter)
+  mdl$optim.iterator <- mdl$setup$iterator.class$new(
+      mdl$observation$response,
+      mdl$observation$offset,
+      max.iter = mdl$setup$max.iter,
+      context = mdl$setup)  # TODO(kuehnelf): not very elegant
 
   # add random effects in the order they were parsed in the formula,
   # this is more transparent and simpler than a configuration flag, i.e.
@@ -273,6 +278,10 @@ FitEMRE <- function(mdl, max.iter, ...) {
   #       iterations before taking a sample.
   #   update.mode: A string with the following choices, 'full.bayes',
   #     'empirical.bayes', 'fixed.prior.sample' & 'fixed.prior.map'
+  #   llik.interval: A positive integer will compute the posterior
+  #     log-likelihood, log P(response | ranefs, fixefs, offset, ...),
+  #     at iterations spaced by llik.interval. Zero or negative
+  #     will disable llik computations
   #   debug: boolean (default FALSE) print additional information along the way.
   # Returns:
   #   An updated model object

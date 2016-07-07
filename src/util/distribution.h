@@ -16,7 +16,7 @@
 
 #include <memory>
 
-#include "third_party/gsl/gsl/gsl_rng.h"
+#include "gsl/gsl_rng.h"
 
 namespace emre {
 namespace util {

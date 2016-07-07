@@ -15,8 +15,8 @@
 
 #include <algorithm>
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/indexers/bias_indexer.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/indexers/memory_indexer.h"
+#include "indexers/bias_indexer.h"
+#include "indexers/memory_indexer.h"
 #include "testing/base/public/gunit.h"
 
 namespace {

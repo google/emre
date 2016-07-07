@@ -1,5 +1,3 @@
-library(pryr)
-
 # common shared utility function
 .GenerateModelData <- function(
     nobs = 10000,
@@ -108,7 +106,7 @@ TestRandomEffect <- function() {
 }
 
 TestIsDoneOptimIterator <- function() {
-  it <- OptimIterator$new(NULL, start.iter = 0, max.iter = 200)
+  it <- OptimIterator$new(NULL, NULL, start.iter = 0, max.iter = 200)
 
   checkEquals(it$max.iter, 200)
   checkEquals(it$iter, 0)
@@ -274,6 +272,10 @@ TestFixedPriorMAPinInterleavedFit <- function() {
     mdl2 <- FitEMRE(mdl2, max.iter = max.iter)
   }
 
+  # we shouldn't have any llik trace
+  checkTrue(is.null(mdl1$llik))
+  checkTrue(is.null(mdl2$llik))
+
   # compare with a single run
   # TODO(kuehnelf): eliminate optim.iter from the settings
   mdl1.single.run <- SetupEMREoptim(
@@ -346,7 +348,12 @@ TestEmpiricalBayesInInterleavedFit <- function() {
       "y ~ 1 + (1|x.1) + (1|x.2) + (1|x.3) + offset(n)",
       data = model1$dat, model.constructor = PoissonEMRE,
       thinning.interval = 10L)
-  mdl1.single.run <- FitEMRE(mdl1.single.run, max.iter = 100, debug = FALSE)
+  mdl1.single.run <- FitEMRE(mdl1.single.run, max.iter = 100,
+                             llik.interval = 10, debug = FALSE)
+
+  # check if llik trace exists
+  checkEquals(length(mdl1.single.run$llik), 10)
+  checkTrue(all(!is.na(mdl1.single.run$llik)))
 
   # only check model 1 priors
   kExpectedPriors <- list(

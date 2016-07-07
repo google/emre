@@ -13,9 +13,9 @@
 
 #include "scaled_feature_util.h"  // NOLINT
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/indexers/memory_indexer.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/indexers/memory_vector.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/indexers/vector_storage.h"
+#include "indexers/memory_indexer.h"
+#include "indexers/memory_vector.h"
+#include "indexers/vector_storage.h"
 #include "testing/base/public/gunit.h"
 
 namespace emre {

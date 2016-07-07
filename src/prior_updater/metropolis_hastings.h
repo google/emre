@@ -19,9 +19,9 @@
 #include <vector>
 
 #include "likelihoods.h"  // NOLINT
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/arrayslice.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/basic_types.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/distribution.h"
+#include "util/arrayslice.h"
+#include "util/basic_types.h"
+#include "util/distribution.h"
 
 namespace emre {
 namespace metropolis_hastings {

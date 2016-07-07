@@ -15,9 +15,9 @@
 
 #include <math.h>
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/base/logging.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/base/stringprintf.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/parameter_updater/scaled_feature_util.h"
+#include "base/logging.h"
+#include "base/stringprintf.h"
+#include "parameter_updater/scaled_feature_util.h"
 
 namespace emre {
 

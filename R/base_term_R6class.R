@@ -25,7 +25,8 @@ BaseTerm <- R6Class("BaseTerm",
 
     set.initial.prior.from.string = function(value) {
       stopifnot(is.character(value))
-      private$initial.prior <- readASCII(emre.FeatureFamilyPrior, value)
+      private$initial.prior <-
+          RProtoBuf::readASCII(emre.FeatureFamilyPrior, value)
     },
 
     initialize = function(formula.str = NULL, context = NULL, ...) {
@@ -72,7 +73,7 @@ BaseTerm <- R6Class("BaseTerm",
   private = list(
     # Sets the initial.prior proto, specialize in sub-classes
     init.prior = function() {
-      private$initial.prior <- new(P("emre.FeatureFamilyPrior"))
+      private$initial.prior <- new(RProtoBuf::P("emre.FeatureFamilyPrior"))
     },
 
     parse.term = function(formula.str, context) {
@@ -100,7 +101,7 @@ ConstructRandomEffect <- function(x, response = NULL, offset = NULL,
   ranef <- x$construct.random.effect(index.reader)
   if (!is.null(ranef) && !is.null(response)) {
     EmreDebugPrint("calculate immutable stats")
-    ranef$calc.immutable.stats(response = response, offset = offset)
+    ranef$calc.immutable.stats(response, offset)
   }
   return(ranef)
 }

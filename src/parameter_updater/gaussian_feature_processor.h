@@ -60,29 +60,30 @@ class GaussianFeatureProcessor : public UpdateProcessor {
  public:
   void AddToPrediction(IndexReader* index,
                        util::ArraySlice<double> coefficients,
-                       util::MutableArraySlice<double> p_events) override;
+                       util::MutableArraySlice<double> pred_values) override;
 
   void GetStatsForUpdate(
       IndexReader* index,
-      util::ArraySlice<double> offsets,
+      util::ArraySlice<double> inverse_variance,
       util::ArraySlice<double> coefficients,
-      util::ArraySlice<double> p_events,
-      util::MutableArraySlice<double> level_predicted_events) override {
+      util::ArraySlice<double> pred_values,
+      util::MutableArraySlice<double> level_predicted_values) override {
     GetStatsForUpdateGaussGaussImpl(
-        index, offsets, coefficients, p_events, level_predicted_events);
+        index, inverse_variance, coefficients, pred_values,
+        level_predicted_values);
   }
 
   void UpdatePredictions(IndexReader* index,
                          util::ArraySlice<double> coefficient_changes,
-                         util::MutableArraySlice<double> p_events) override;
+                         util::MutableArraySlice<double> pred_values) override;
 
  private:
   static void GetStatsForUpdateGaussGaussImpl(
       IndexReader* index,
-      util::ArraySlice<double> offsets,
+      util::ArraySlice<double> inverse_variance,
       util::ArraySlice<double> coefficients,
-      util::ArraySlice<double> p_events,
-      util::MutableArraySlice<double> scaled_mean);
+      util::ArraySlice<double> pred_values,
+      util::MutableArraySlice<double> residual_error);
 };
 
 }  // namespace emre

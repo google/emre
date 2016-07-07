@@ -13,7 +13,7 @@
 
 #include "gaussian_feature_processor.h"  // NOLINT
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/base/logging.h"
+#include "base/logging.h"
 
 namespace emre {
 
@@ -23,43 +23,43 @@ using util::MutableArraySlice;
 void GaussianFeatureProcessor::AddToPrediction(
     IndexReader* index,
     ArraySlice<double> coefficients,
-    MutableArraySlice<double> p_events) {
-  auto p_events_iter = p_events.begin();
+    MutableArraySlice<double> pred_values) {
+  auto p_value_iter = pred_values.begin();
   auto level_iter = index->GetLevelIterator();
   auto scaling_iter = index->GetScalingIterator();
-  for (; !level_iter.Done(); ++p_events_iter) {
+  for (; !level_iter.Done(); ++p_value_iter) {
     const int level_index = level_iter.Next();
     const double scl = scaling_iter.Next();
     if (level_index >= 0) {
-      *p_events_iter += coefficients[level_index] * scl;
+      *p_value_iter += coefficients[level_index] * scl;
     }
   }
 }
 
 void GaussianFeatureProcessor::GetStatsForUpdateGaussGaussImpl(
     IndexReader* index,
-    ArraySlice<double> offset,
+    ArraySlice<double> inverse_variance,
     ArraySlice<double> coefficients,
-    ArraySlice<double> p_events,
-    MutableArraySlice<double> scaled_mean) {
+    ArraySlice<double> pred_values,
+    MutableArraySlice<double> residual_error) {
   CHECK_NOTNULL(index);
   const int num_levels = index->GetNumLevels();
   const int num_obs = index->GetNumObservations();
-  CHECK_EQ(num_obs, offset.size());
-  CHECK_GE(scaled_mean.size(), num_levels);
-  auto p_events_iter = p_events.begin();
-  auto offset_iter = offset.begin();
+  CHECK_EQ(num_obs, inverse_variance.size());
+  CHECK_GE(residual_error.size(), num_levels);
+  auto p_value_iter = pred_values.begin();
+  auto inv_var_iter = inverse_variance.begin();
   auto level_itr = index->GetLevelIterator();
   auto scaling_itr = index->GetScalingIterator();
 
-  for (int j = 0; j < num_obs; ++j, ++p_events_iter, ++offset_iter) {
+  for (int j = 0; j < num_obs; ++j, ++p_value_iter, ++inv_var_iter) {
     const int level_index = level_itr.Next();
     const double scl = scaling_itr.Next();
-    const double offset = *offset_iter;
+    const double inv_var = *inv_var_iter;
 
     if (level_index >= 0) {
-      double pred_events = *p_events_iter - coefficients[level_index];
-      scaled_mean[level_index] -= pred_events * offset * scl;
+      double error = *p_value_iter - coefficients[level_index];
+      residual_error[level_index] -= error * inv_var * scl;
     }
   }
 }
@@ -67,15 +67,15 @@ void GaussianFeatureProcessor::GetStatsForUpdateGaussGaussImpl(
 void GaussianFeatureProcessor::UpdatePredictions(
     IndexReader* index,
     ArraySlice<double> coefficient_changes,
-    MutableArraySlice<double> p_events)  {
+    MutableArraySlice<double> pred_values)  {
   const int n_obs = index->GetNumObservations();
-  CHECK_GE(p_events.size(), n_obs);
-  auto p_events_itr = p_events.begin();
+  CHECK_GE(pred_values.size(), n_obs);
+  auto p_value_iter = pred_values.begin();
   auto level_iter = index->GetLevelIterator();
-  for (int i = 0; i < n_obs; ++i, ++p_events_itr) {
+  for (int i = 0; i < n_obs; ++i, ++p_value_iter) {
     const int level_index = level_iter.Next();
     if (level_index >= 0) {
-      (*p_events_itr) += coefficient_changes[level_index];
+      (*p_value_iter) += coefficient_changes[level_index];
     }
   }
 }

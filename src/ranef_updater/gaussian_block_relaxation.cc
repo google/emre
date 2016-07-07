@@ -15,7 +15,7 @@
 
 #include <math.h>
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/distribution.h"
+#include "util/distribution.h"
 
 namespace emre {
 namespace gaussian {

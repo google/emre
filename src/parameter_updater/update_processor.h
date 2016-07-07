@@ -25,8 +25,8 @@
 #ifndef EMRE_PARAMETER_UPDATER_UPDATE_PROCESSOR_H_  // NOLINT
 #define EMRE_PARAMETER_UPDATER_UPDATE_PROCESSOR_H_
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/indexers/indexer.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/arrayslice.h"
+#include "indexers/indexer.h"
+#include "util/arrayslice.h"
 
 namespace emre {
 

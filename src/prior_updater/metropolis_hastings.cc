@@ -13,7 +13,7 @@
 
 #include "metropolis_hastings.h"  // NOLINT
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/base/logging.h"
+#include "base/logging.h"
 
 namespace emre {
 namespace metropolis_hastings {

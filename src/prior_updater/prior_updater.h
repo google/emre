@@ -20,9 +20,9 @@
 #ifndef EMRE_PRIOR_UPDATER_PRIOR_UPDATER_H_  // NOLINT
 #define EMRE_PRIOR_UPDATER_PRIOR_UPDATER_H_
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/training_data.proto.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/arrayslice.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/distribution.h"
+#include "training_data.proto.h"
+#include "util/arrayslice.h"
+#include "util/distribution.h"
 
 namespace emre {
 

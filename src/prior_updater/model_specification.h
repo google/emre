@@ -22,8 +22,8 @@
 #ifndef EMRE_PRIOR_UPDATER_MODEL_SPECIFICATION_H_  // NOLINT
 #define EMRE_PRIOR_UPDATER_MODEL_SPECIFICATION_H_
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/ranef_updater/block_relaxation.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/distribution.h"
+#include "ranef_updater/block_relaxation.h"
+#include "util/distribution.h"
 
 namespace emre {
 

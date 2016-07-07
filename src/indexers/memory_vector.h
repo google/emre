@@ -17,7 +17,7 @@
 #include <algorithm>
 
 #include "vector_storage.h"  // NOLINT
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/base/integral_types.h"
+#include "base/integral_types.h"
 
 namespace emre {
 

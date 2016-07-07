@@ -29,8 +29,7 @@ RandomEffect <- R6Class("RandomEffect",
     get.prior = function() { .GetRanefPrior(private$updater) },
     does.update.prior = function() { !private$is.fixed.effect },
 
-    calc.immutable.stats = function(response = response,
-                                    offset = offset) {
+    calc.immutable.stats = function(response, offset) {
       # Before updating model parameters through the fitting or sampling
       # algorithm, we must compute the sufficient statistics, here
       # aggregate (sum) events per level (the immutable part) and
@@ -60,6 +59,7 @@ RandomEffect <- R6Class("RandomEffect",
     },
 
     collect.stats = function(p.events, offset) {
+      # TODO(kuehnelf): last argument should be named parameter
       private$prediction.per.level <- .CollectStats(private$updater, offset,
                                                     self$coefficients, p.events,
                                                     NULL)
@@ -113,6 +113,8 @@ ScaledRandomEffect <- R6Class("ScaledRandomEffect",
     initialize = function(prior, index.reader) {
       stopifnot(!is.null(prior),
                 !is.null(index.reader))
+      # TODO(kuehnelf): eliminate this section,
+      # 999 is the don't update prior in the FeatureFamilyPrior proto
       if (prior$prior_update_type == 999) {
         private$is.fixed.effect <- TRUE
       }
@@ -159,10 +161,11 @@ ScaledRandomEffect <- R6Class("ScaledRandomEffect",
 )
 
 GaussianRandomEffect <- R6Class("GaussianRandomEffect",
-  inherit = ScaledRandomEffect,
+  inherit = RandomEffect,
   cloneable = FALSE,
   public = list(
     cached.immutable.stats = c(),
+    invvar.per.level = c(),
     # constructor
     initialize = function(prior, index.reader) {
       stopifnot(!is.null(prior),
@@ -176,12 +179,12 @@ GaussianRandomEffect <- R6Class("GaussianRandomEffect",
         sprintf("initialize gaussian %s with %d levels",
                 ff.name, num.levels))
       private$updater <- .CreateGaussianRanefUpdater(prior, index.reader)
+      private$residual.inv.var.callback <- function() { return(1.0) }
       EmreDebugPrint("... intialized")
       self$coefficients <- rep(0.0, num.levels)
     },
 
-    calc.immutable.stats = function(response = response,
-                                    offset = offset) {
+    calc.immutable.stats = function(response, inverse.variance) {
       # For gaussian model, part of the immutable stats is the product
       # of response, offsets and scaling aggregated to the feature level.
       # This quantity is used in the collect.stats function.
@@ -192,22 +195,69 @@ GaussianRandomEffect <- R6Class("GaussianRandomEffect",
       # a negative index indicates that there a NA features
       idx <- (row2level.map < 0)
       row2level.map[idx] <- NA
-      # this aggregates the product of response, offsets and scaling
-      # to the level id while leaving out NAs
-      ros <- response * offset
-      self$cached.immutable.stats <- tapply(ros, row2level.map, FUN = sum)
-      oss <- offset
-      self$events.per.level <- tapply(oss, row2level.map, FUN = sum)
+      # this aggregates the product of response, inverse.variance and
+      # assuming scaling = 1.0 to the level id while leaving out NAs
+      riv <- response * inverse.variance
+      self$cached.immutable.stats <- tapply(riv, row2level.map, FUN = sum)
+      # this is what we call invvar in the paper
+      self$invvar.per.level <- tapply(inverse.variance, row2level.map,
+                                      FUN = sum)
       return(self$cached.immutable.stats)
     },
 
-    collect.stats = function(p.events, offset) {
+    collect.stats = function(p.values, inverse.variance) {
       private$prediction.per.level <- c(self$cached.immutable.stats)  # copy
+      # TODO(kuehnelf): rename prediction.per.level to error.per.level
       private$prediction.per.level <- .CollectStats(
-          private$updater, offset,
-          self$coefficients, p.events,
+          private$updater, inverse.variance,
+          self$coefficients, p.values,
           private$prediction.per.level)
+      residual.inv.variance <- private$residual.inv.var.callback()
+      private$prediction.per.level <- private$prediction.per.level *
+                                      residual.inv.variance
+    },
+
+    update.coefficients = function(p.values) {
+      # Updates and returns p.values in place without copy. Also updates
+      # self$coefficients in place.
+      #
+      # Args:
+      #   p.values: R vector for predicted values (Gaussian model) with
+      #     length as the number of observations.
+      #
+      # Returns:
+      #   p.values: The same R vector (not a copy) with adjusted predictions.
+      if (is.na(private$prediction.per.level) ||
+          length(self$invvar.per.level) < length(self$coefficients)) return
+      old.coefficients <- c(self$coefficients)  # make a copy
+      residual.inv.variance <- private$residual.inv.var.callback()
+      .UpdateCoefficients(private$updater, self$coefficients,
+                          private$prediction.per.level,
+                          self$invvar.per.level * residual.inv.variance)
+
+      coefficient.changes <- self$coefficients - old.coefficients
+      return(.UpdatePrediction(private$updater, p.values, coefficient.changes))
+    },
+
+    update.prior = function() {
+      # Returns: NULL
+      if (is.na(private$prediction.per.level) ||
+          length(self$invvar.per.level) < length(self$coefficients)) return
+      # TODO(kuehnelf): improve API for MH sampling prior in R code
+      residual.inv.variance <- private$residual.inv.var.callback()
+      .UpdateRanefPrior(private$updater,
+                        self$coefficients,
+                        private$prediction.per.level,
+                        self$invvar.per.level * residual.inv.variance)
+    },
+
+    set.residual.inv.var.callback = function(callback) {
+      private$residual.inv.var.callback <- callback
     }
+  ),
+
+  private = list(
+    residual.inv.var.callback = NA
   )
 )
 
@@ -215,8 +265,7 @@ ScaledGaussianRandomEffect <- R6Class("ScaledGaussianRandomEffect",
   inherit = GaussianRandomEffect,
   cloneable = FALSE,
   public = list(
-    calc.immutable.stats = function(response = response,
-                                    offset = offset) {
+    calc.immutable.stats = function(response, inverse.variance) {
       # For gaussian model, part of the immutable stats is the product
       # of response, offsets and scaling aggregated to the feature level.
       # This quantity is used in the collect.stats function.
@@ -228,12 +277,13 @@ ScaledGaussianRandomEffect <- R6Class("ScaledGaussianRandomEffect",
       # a negative index indicates that there a NA features
       idx <- (row2level.map < 0)
       row2level.map[idx] <- NA
-      # this aggregates the product of response, offsets and scaling
-      # to the level id while leaving out NAs
-      ros <- response * offset * scaling
-      self$cached.immutable.stats <- tapply(ros, row2level.map, FUN = sum)
-      oss <- offset * scaling * scaling
-      self$events.per.level <- tapply(oss, row2level.map, FUN = sum)
+      # this aggregates the product of response, inverse.variance and
+      # scaling to the level id while leaving out NAs
+      rivs <- response * inverse.variance * scaling
+      self$cached.immutable.stats <- tapply(rivs, row2level.map, FUN = sum)
+      invvar <- invvar * scaling * scaling
+      # this is what we call invvar in the paper
+      self$invvar.per.level <- tapply(invvar, row2level.map, FUN = sum)
       return(self$cached.immutable.stats)
     }
   )

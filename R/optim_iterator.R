@@ -1,15 +1,17 @@
-library(matrixStats)
-
 OptimIterator <- R6Class("OptimIterator",
   public = list(
     iter = NA,
     max.iter = NA,
-    p.events = c(),
+    p.events = c(),  # TODO(kuehnelf): rename to p.values (for gaussian model)
 
-    initialize = function(offset, start.iter = 0, max.iter = 100, ...) {
+    # TODO(kuehnelf): maybe simplify API to pass in a named list
+    initialize = function(response, offset, start.iter = 0,
+                          max.iter = 100, ...) {
+      private$response <- response
       private$offset <- offset
       self$iter <- start.iter
       self$max.iter <- max.iter
+      EmreDebugPrint("OptimIterator initialized")
     },
 
     # public methods
@@ -53,6 +55,12 @@ OptimIterator <- R6Class("OptimIterator",
       invisible(self)
     },
 
+    calc.llik = function() {
+      # computes poisson log likelihood up to a constant
+      llik <- sum(private$response * log(self$p.events)) - sum(self$p.events)
+      return(llik)
+    },
+
     snapshot = function(iter, k, trace) {
       # Method to keep track of fitting progress.
       #
@@ -76,6 +84,11 @@ OptimIterator <- R6Class("OptimIterator",
       # take a ranef coefficient snapshot, snapshot[[feature.name]] is a matrix
       if (!is.null(trace$snapshots)) {
         trace <- self$snapshot.coefficients(iter, k, trace)
+      }
+
+      # trace llik as a way to diagnose convergence
+      if (!is.null(trace$llik) && iter %in% names(trace$llik)) {
+        trace$llik[[paste0(iter)]] <- self$calc.llik()
       }
 
       return(trace)
@@ -120,6 +133,10 @@ OptimIterator <- R6Class("OptimIterator",
       }
     },
 
+    # after we iterated over all feature families
+    finish = function() {
+    },
+
     # iterate over all feature families
     iterate = function(trace = NULL) {
       if (self$is.done()) {
@@ -131,6 +148,7 @@ OptimIterator <- R6Class("OptimIterator",
         trace <- self$snapshot(self$iter, k, trace)
         self$process.family(self$iter, k)
       }
+      self$finish()
       self$iter <- self$iter + 1
 
       if (self$is.done()) {
@@ -164,8 +182,80 @@ OptimIterator <- R6Class("OptimIterator",
 
   ),
   private = list(
-    offset = c(),
+    offset = c(),  # unaggregated offset (Poisson model)
+    response = c(),  # and response
     ranef.families = list()
+  )
+)
+
+GaussOptimIterator <- R6Class("GaussOptimIterator",
+  inherit = OptimIterator,
+  cloneable = FALSE,
+  public = list(
+    residual.inv.var = list("0" = 1.0),  # by default assume 0 start iteration
+    prior.residual.inv.var = list(mean = 1.0, sd = 0.6),
+
+    initialize = function(..., context = NULL) {
+      if (!is.null(context)) {
+        if (context$update.mode == "full.bayes") {
+          private$sample.variance <- TRUE
+        } else if (context$update.mode == "empirical.bayes") {
+          private$sample.variance <- FALSE
+        } else {
+          stop(paste("other update modes are not supported:",
+                    context$update.mode))
+        }
+      }
+      super$initialize(...)
+    },
+
+    # add the residual variance callback
+    add.ranef = function(x) {
+      stopifnot(inherits(x, "GaussianRandomEffect"))  # safe-guard
+      x$set.residual.inv.var.callback(function() {
+          return(as.numeric(tail(self$residual.inv.var, 1))) })
+      super$add.ranef(x)
+    },
+
+    # we'll draw samples from the posterior for the residual variance
+    finish = function() {
+      # TODO(kuehnelf): change names p.events & offset to p.values & inv.var
+      error.term <- private$response - self$p.events
+      error.sqr <- sum(error.term * error.term * private$offset)
+      M <- length(private$response)  # assumes unaggregated data
+      p <- self$prior.residual.inv.var  # short hand
+      eta <- p$mean / (p$sd * p$sd)
+      theta <- p$mean * eta
+      new.residual.inv.var <-
+          ifelse(private$sample.variance,
+                 rgamma(1, shape = theta + M * 0.5,
+                        rate = eta + error.sqr * 0.5),
+                 (theta + M * 0.5 - 1) / (eta + error.sqr * 0.5))  # mode
+      EmreDebugPrint(sprintf("residual inv. variance %0.2f",
+                             new.residual.inv.var))
+      if (new.residual.inv.var <= 0) {
+        stop(paste("residual variance is infinite,",
+                   "cannot estimate residual variance."))
+      }
+      tmp <- list(val = new.residual.inv.var)
+      names(tmp) <- paste0(self$iter + 1)  # +1 because this is called b. inc.
+      self$residual.inv.var <- c(self$residual.inv.var, tmp)
+    },
+
+    calc.llik = function() {
+      # calculates gaussian llik up to a constant
+      error.term <- (private$response - self$p.events)
+      error.sqr <- sum(error.term * error.term * private$offset)
+      llik <- (-0.5) * error.sqr * self$residual.inv.var
+      llik <- llik - 0.5 * sum(log(private$offset))
+      M <- length(private$response)  # assumes data has not been aggregated
+      llik <- llik + 0.5 * M * sum(log(self$residual.inv.var))
+      return(llik)
+    }
+  ),
+
+  private = list(
+    sample.variance = TRUE
   )
 )
 
@@ -193,7 +283,7 @@ OptimIterator <- R6Class("OptimIterator",
   it$set.start.iter(start.iter)
   it$set.max.iter(max.iter)
 
-  trace <- list(snapshots = list(), prior.snapshots = list())
+  trace <- list(snapshots = list(), prior.snapshots = list(), llik = c())
   # set up the ranef & prior snapshot schedule
   feature.order <- it$get.feature.order()
   for (k in seq_along(feature.order)) {
@@ -222,6 +312,13 @@ OptimIterator <- R6Class("OptimIterator",
       trace[["prior.snapshots"]][[nm]] <- prior.snapshots
     }
   }
+  # set up the llik trace schedule
+  if (mdl$setup$llik.interval > 0) {
+    colnames <- .GenerateSnapshotSchedule(start.iter, max.iter,
+                                          mdl$setup$llik.interval)
+    trace$llik <- rep(NA, length(colnames))
+    names(trace$llik) <- colnames
+  }
 
   # a simple main iteration loop
   while (!it$is.done()) {
@@ -241,6 +338,9 @@ OptimIterator <- R6Class("OptimIterator",
   for (nm in names(trace$snapshots)) {
     mdl$snapshots[[nm]] <- rbind(mdl$snapshots[[nm]], trace$snapshots[[nm]])
   }
+
+  # concatenate llik
+  mdl$llik <- c(mdl$llik, trace$llik)
 
   # summarize fitted results
   mdl$fit <- list(last.iteration = it$iter)

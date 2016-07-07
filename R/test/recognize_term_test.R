@@ -26,6 +26,21 @@ TestOffsetTerm <- function() {
   checkTrue(!RecognizeTerm(o, "offset( n"))
 }
 
+TestLogOffsetTerm <- function() {
+  o <- LogOffsetTerm$new()
+  checkTrue(inherits(o, "OffsetTerm"))
+  checkTrue(RecognizeTerm(o, "log.offset(n)"))
+  checkTrue(RecognizeTerm(o, "log.offset( log(n))"))
+  checkTrue(RecognizeTerm(o, "log.offset( log(n) )"))
+  checkTrue(RecognizeTerm(o, "log.offset(1)"))
+  # unfortunately, regex doesn't deal with unbalanced paranthesis
+  checkTrue(RecognizeTerm(o, "log.offset( log(n)"))
+  # checkFalse would be more appropriate
+  checkTrue(!RecognizeTerm(o, "offset(1)"))
+  checkTrue(!RecognizeTerm(o, "offset (n)"))
+  checkTrue(!RecognizeTerm(o, "offset( n"))
+}
+
 TestInterceptTerm <- function() {
   i <- InterceptTerm$new()
   checkTrue(inherits(i, "InterceptTerm"))

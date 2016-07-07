@@ -44,7 +44,7 @@ GetFamilyNames.EMRE <- function(x) {
   #
   # Returns:
   #   a vector of strings with feature family names.
-  stopifnot(!is.null(x), !is.null(x$optim.iterator))
+  stopifnot(inherits(x, "EMRE"), !is.null(x$optim.iterator))
   return(x$optim.iterator$get.feature.order())
 }
 setMethod("GetFamilyNames", signature = "EMRE", GetFamilyNames.EMRE)
@@ -99,3 +99,16 @@ GetPrior.EMRE <- function(x, family.name, start.iter = 0, end.iter = Inf) {
 }
 setMethod("GetPrior", signature = "EMRE", GetPrior.EMRE)
 
+GetResidualVariance.EMRE <- function(x, start.iter = 0, end.iter = Inf) {
+  # Returns a vector with residual variance samples for specified iterations
+  # Args:
+  #   x: a GaussianEMRE model object.
+  # Returns:
+  #   a double value with the residual variance estimate in the last iteration.
+  stopifnot(inherits(x, "GaussianEMRE"), !is.null(x$optim.iterator))
+
+  iters <- as.numeric(names(x$optim.iterator$residual.inv.var))
+  idx <- which(start.iter <= iters & iters <= end.iter)
+  return(1.0 / as.numeric(x$optim.iterator$residual.inv.var[idx]))
+}
+setMethod("GetResidualVariance", signature = "EMRE", GetResidualVariance.EMRE)

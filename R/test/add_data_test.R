@@ -5,26 +5,36 @@ TestInterceptTerm <- function() {
 }
 
 TestOffsetTermData <- function() {
-  o <- OffsetTerm$new("offset(x)")
-  vec <- AddData(o, data.frame(x = 1:10))
-  checkEquals(vec, 1:10)
+  o1 <- OffsetTerm$new("offset(x)")
+  vec1 <- AddData(o1, data.frame(x = 1:10))
+  checkEquals(vec1, 1:10)
 
   o2 <- OffsetTerm$new("offset(x*x)")
   vec2 <- AddData(o2, data.frame(x = 1:10))
   checkEquals(vec2, (1:10)^2)
 
-  # LMER type offset syntax
   o3 <- OffsetTerm$new("offset(log(x))")
   vec3 <- AddData(o3, data.frame(x = 1:10))
-  checkEquals(vec3, 1:10)
+  checkEqualsNumeric(vec3, log(1:10))
 
-  o4 <- OffsetTerm$new("offset(log(log(x)))")
+  o4 <- OffsetTerm$new("offset(log(x*x))")
   vec4 <- AddData(o4, data.frame(x = 1:10))
-  checkEqualsNumeric(vec4, log(1:10), tolerance = 0.00001)
+  checkEqualsNumeric(vec4, 2 * log(1:10))
+}
 
-  o5 <- OffsetTerm$new("offset(log(x*x))")
-  vec5 <- AddData(o5, data.frame(x = 1:10))
-  checkEquals(vec5, (1:10)^2)
+TestLogOffsetTermData <- function() {
+  o1 <- LogOffsetTerm$new("log.offset(x)")
+  vec1 <- AddData(o1, data.frame(x = 1:10))
+  checkEqualsNumeric(vec1, log(1:10))
+
+  o2 <- LogOffsetTerm$new("log.offset(x*x)")
+  vec2 <- AddData(o2, data.frame(x = 1:10))
+  checkEqualsNumeric(vec2, 2 * log(1:10))
+
+  # this should result in a 'double' log
+  o3 <- LogOffsetTerm$new("log.offset(log(x))")
+  vec3 <- AddData(o3, data.frame(x = 2:11))
+  checkEqualsNumeric(vec3, log(log(2:11)))
 }
 
 TestFixedEffectSingleFactorDataFrame <- function() {

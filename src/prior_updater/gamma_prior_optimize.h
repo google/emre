@@ -16,7 +16,7 @@
 
 #include <vector>
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/basic_types.h"
+#include "util/basic_types.h"
 #include "prior_updater.h"  // NOLINT
 
 namespace emre {

@@ -18,8 +18,8 @@
 
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_roots.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/base/logging.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/indexers/vector_storage.h"
+#include "base/logging.h"
+#include "indexers/vector_storage.h"
 
 namespace emre {
 

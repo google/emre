@@ -170,7 +170,7 @@ InterceptTerm <- R6Class("InterceptTerm",
 )
 
 ################################################################################
-# OffsetTerm
+# OffsetTerm(s)
 ################################################################################
 
 OffsetTerm <- R6Class("OffsetTerm",
@@ -188,27 +188,41 @@ OffsetTerm <- R6Class("OffsetTerm",
     construct.random.effect = function(...) {},
 
     recognize.term = function(formula.str) {
-      return(length(grep(x = formula.str, pattern = "offset\\(.*\\)$")) > 0)
+      return(length(grep(x = formula.str, pattern = "^offset\\(.*\\)$")) > 0)
     }
   ),
 
   private = list(
     get.offset.data = function(data) {
-      stopifnot(!is.na(private$lmer.offset.term))
-      return(eval(parse(text = private$lmer.offset.term), envir = data))
+      stopifnot(!is.na(private$offset.term))
+      return(eval(parse(text = private$offset.term), envir = data))
     },
 
     parse.term = function(formula.str, context) {
       self$parser$str <- formula.str
-      # lmer offset term either succeeds in matching and returns the inner
-      # expression or returns the entire expression.
-      offset.term <- gsub("^offset\\((.*)\\)$", "\\1", formula.str, perl = TRUE)
-      lmer.offset.term <- gsub("^log\\((.*)\\)$", "\\1", Trim(offset.term),
-                               perl = TRUE)
-      private$lmer.offset.term <- lmer.offset.term
+      private$offset.term <- gsub("^offset\\((.*)\\)$", "\\1",
+                                  formula.str, perl = TRUE)
     },
 
-    # instance variables
-    lmer.offset.term = NA
+    offset.term = NA
+  )
+)
+
+LogOffsetTerm <- R6Class("LogOffsetTerm",
+  inherit = OffsetTerm,
+  public = list(
+    recognize.term = function(formula.str) {
+      return(length(grep(x = formula.str,
+                         pattern = "^log.offset\\(.*\\)$")) > 0)
+    }
+  ),
+
+  private = list(
+    parse.term = function(formula.str, context) {
+      self$parser$str <- formula.str
+      private$offset.term <-
+          paste0("log(", gsub("^log.offset\\((.*)\\)$", "\\1",
+                              formula.str, perl = TRUE), ")")
+    }
   )
 )

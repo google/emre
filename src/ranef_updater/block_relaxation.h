@@ -30,10 +30,10 @@
 #ifndef EMRE_RANEF_UPDATER_BLOCK_RELAXATION_H_  // NOLINT
 #define EMRE_RANEF_UPDATER_BLOCK_RELAXATION_H_
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/parameter_updater/update_processor.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/training_data.proto.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/arrayslice.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/distribution.h"
+#include "parameter_updater/update_processor.h"
+#include "training_data.proto.h"
+#include "util/arrayslice.h"
+#include "util/distribution.h"
 
 namespace emre {
 

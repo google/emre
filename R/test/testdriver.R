@@ -1,4 +1,5 @@
 require(nativesupport)
+require(pryr)
 require(emre)
 require(RUnit)
 RequireInitGoogle()

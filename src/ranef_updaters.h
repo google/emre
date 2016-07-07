@@ -24,12 +24,12 @@
 #include <algorithm>
 #include <vector>
 
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/indexers/indexer.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/parameter_updater/update_processor.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/prior_updater/prior_updater.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/ranef_updater/block_relaxation.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/training_data.proto.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/distribution.h"
+#include "indexers/indexer.h"
+#include "parameter_updater/update_processor.h"
+#include "prior_updater/prior_updater.h"
+#include "ranef_updater/block_relaxation.h"
+#include "training_data.proto.h"
+#include "util/distribution.h"
 
 // We export functions into R with lowercase and underscores.
 // The R API has corresponding camelcase functions.

@@ -22,12 +22,12 @@
 #define EMRE_PARAMETER_UPDATER_SCALED_FEATURE_UTIL_H_
 
 #include <vector>
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/indexers/indexer.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/indexers/vector_storage.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/arrayslice.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/basic_types.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/util/distribution.h"
-#include "contentads/analysis/caa/search_plus/regmh/emre/src/prior_updater/metropolis_hastings.h"
+#include "indexers/indexer.h"
+#include "indexers/vector_storage.h"
+#include "util/arrayslice.h"
+#include "util/basic_types.h"
+#include "util/distribution.h"
+#include "prior_updater/metropolis_hastings.h"
 
 namespace emre {
 

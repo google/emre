@@ -20,7 +20,7 @@
 #ifndef EMRE_PRIOR_UPDATER_PRIOR_UPDATER_H_  // NOLINT
 #define EMRE_PRIOR_UPDATER_PRIOR_UPDATER_H_
 
-#include "training_data.proto.h"
+#include "training_data.pb.h"
 #include "util/arrayslice.h"
 #include "util/distribution.h"
 

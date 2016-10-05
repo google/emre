@@ -12,7 +12,7 @@
 // limitations under the License.
 
 #include <math.h>
-#include <algorithm>
+#include <numeric>  // for std::accumulate
 
 #include "gaussian_prior_optimize.h"  // NOLINT
 #include "likelihoods.h"  // NOLINT
@@ -44,7 +44,6 @@ class GaussianIntegratedLikelihoodForVarianceUpdate : public RealFunction {
  private:
   ArraySlice<double> stats_error_;
   ArraySlice<double> stats_invvar_;
-  int num_elts_;
   double prior_mean_;
 };
 
@@ -109,7 +108,7 @@ void GaussianPriorIntegratedOptimize::UpdateVariance(
     ArraySlice<double> stats_error,
     ArraySlice<double> coefficients,
     util::random::Distribution* rng) {
-  vector<double> inv_vars, likelihoods;
+  std::vector<double> inv_vars, likelihoods;
   int max_index = 0;
   const int num_levels = coefficients.size();
 

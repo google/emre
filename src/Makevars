@@ -1,0 +1,12 @@
+## -*- mode: makefile; -*-
+
+CXX_STD = CXX11
+
+## Configure tells us about locations for
+## both Rcpp (ie libRcpp.so and Rcpp.h) and
+## ProtoBuf headers and library via the variables
+PKG_LIBS = -L/opt/local/lib -lprotobuf `gsl-config --libs`
+PKG_CPPFLAGS = -I../src `gsl-config --cflags`
+
+SOURCES = $(wildcard base/*.cc indexers/*.cc parameter_updater/*.cc ranef_updater/*.cc prior_updater/*.cc util/*.cc)
+OBJECTS = indexer_utils.o ranef_updaters.o training_data.pb.o $(SOURCES:.cc=.o)

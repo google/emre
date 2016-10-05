@@ -84,7 +84,7 @@ PoissonScaledFeatureProcessor::PoissonScaledFeatureProcessor(
 void PoissonScaledFeatureProcessor::PrepareUpdater(SupplementalStats* stats) {
   CHECK_NOTNULL(stats);
   stats->aggregate_scaling = ArraySlice<double>(aggregate_scaling_);
-  stats->level_posn_size = ArraySlice<pair<int, int>>(level_posn_size_);
+  stats->level_posn_size = ArraySlice<std::pair<int, int>>(level_posn_size_);
 }
 
 void PoissonScaledFeatureProcessor::GetStatsForUpdateScaledPoissonImpl(
@@ -142,7 +142,7 @@ PoissonLogNormalFeatureProcessor::PoissonLogNormalFeatureProcessor(
   // the data structures are efficient.
   int num_levels = index->GetNumLevels();
   trivial_aggregate_scaling_.assign(num_levels, 1.0);
-  trivial_level_posn_size_.assign(num_levels, pair<int, int>(0, 1));
+  trivial_level_posn_size_.assign(num_levels, std::pair<int, int>(0, 1));
   for (int i = 0; i < num_levels; ++i) {
     trivial_level_posn_size_[i].first = i;
   }

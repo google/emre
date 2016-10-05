@@ -34,7 +34,7 @@ class UpdateProcessor {
  public:
   struct SupplementalStats {
     util::ArraySlice<double> aggregate_scaling;
-    util::ArraySlice<pair<int, int>> level_posn_size;
+    util::ArraySlice<std::pair<int, int>> level_posn_size;
   };
 
   UpdateProcessor() {}

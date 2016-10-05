@@ -1,0 +1,164 @@
+# -*- mode: autoconf; autoconf-indentation: 4; -*-
+#
+# emre configure.in by Frank Kuehnel <kuehnelf@google.com>
+# mostly based on RProtoBuf configure.in by Dirk Eddelbuettel <edd@debian.org>
+#
+# $Id$ require at least autoconf 2.61
+
+# require at least autoconf 2.61
+AC_PREREQ(2.61)
+
+# Process this file with autoconf to produce a configure script.
+AC_INIT([RProtoBuf],[0.4.1])
+m4_include([m4/m4-ax_cxx_compile_stdcxx_0x.m4])
+
+# We are using C++
+AC_LANG(C++)
+AC_REQUIRE_CPP
+AC_PROG_CC
+AC_PROG_CXX
+
+# If we can support std=c++0x we should pass flags to do so (this will
+# enable better int64 support) but we shouldn't cause the build to
+# fail if we can't do this.
+AC_CXX_COMPILE_STDCXX_0X
+
+## simpler alternative to test below:  AC_PATH_PROG(PROTOC, protoc)
+
+AC_DEFUN([AC_PROG_PKGCONFIG], [AC_CHECK_PROG(PKGCONFIG,pkg-config,yes)])
+AC_PROG_PKGCONFIG
+
+## use pkg-config for ProtoBuf settings
+##
+if test x"${PKGCONFIG}" == x"yes"; then
+  if pkg-config --exists protobuf; then
+    protobuf_cxxflags=`pkg-config --cflags protobuf`
+    protobuf_libs=`pkg-config --libs protobuf`
+  else
+    protobuf_cxxflags=""
+    protobuf_libs="-lprotobuf"
+  fi
+else
+  # Add a reasonable default of -lprotobuf if we don't have pkg-config
+  protobuf_cxxflags=""
+  protobuf_libs="-lprotobuf"
+fi
+
+## And make sure these flags are used for the tests below.
+CPPFLAGS="${protobuf_cxxflags} ${CPPFLAGS}"
+CXXFLAGS="${protobuf_cxxflags} ${CXXFLAGS}"
+
+## look for protoc, the ProtoBuf compiler
+AC_DEFUN([AC_PROG_PROTOC], [AC_CHECK_PROG(PROTOC,protoc,yes)])
+AC_PROG_PROTOC
+if test x"${PROTOC}" == x"no" ; then
+    echo "
+  Your installation does not appear to have protoc installed.
+
+  Please make sure that you have a working and complete ProtoBuf installation.
+"
+    exit 1
+fi
+
+## look for protobuf headers -- now use pkg-config which even does minimum version
+##
+## next two lines break witha autoconf 2.65 :-/
+#PROTOBUF_VERSION="2.2.0"
+#PKG_CHECK_MODULES(ProtoBuf, protobuf >= 2.2.0, , AC_MSG_ERROR(Protobuf version 2.2.0 required))
+
+## check for header and ability to link
+## first for headers Debian has in libprotobuf-dev
+protobuf_common_header=google/protobuf/stubs/common.h
+protobuf_common_header_cache_var=AS_TR_SH([ac_cv_header_$protobuf_common_header])
+AC_CHECK_HEADER([$protobuf_common_header],,
+                [
+		# If it didn't work, try adding /usr/local directly then trying again
+		AC_MSG_WARN([Protobuf headers not found with default CXXFLAGS and CPPFLAGS, manually trying /usr/local/include])
+		CPPFLAGS="${protobuf_cxxflags} ${CPPFLAGS} -I/usr/local/include"
+		CXXFLAGS="${protobuf_cxxflags} ${CXXFLAGS} -I/usr/local/include -L/usr/local/lib"
+		# unset the cache variable for this particular header
+		# check, so we can check again with different defaults
+		# specified.
+		AC_MSG_WARN([Unsetting $protobuf_common_header_cache_var])
+		AS_UNSET([$protobuf_common_header_cache_var])
+		AC_CHECK_HEADER([$protobuf_common_header],,
+		[AC_MSG_ERROR([ERROR: ProtoBuf headers required; use '-Iincludedir' in CXXFLAGS for unusual locations.])])
+		])
+## second for headers Debian has in libprotoc-dev
+AC_CHECK_HEADER(google/protobuf/compiler/code_generator.h,,
+                [AC_MSG_ERROR([ERROR: ProtoBuf compiler headers required; use '-Iincludedir' in CXXFLAGS for unusual locations.])])
+## third check the lib itself
+#pb_savedlibs="$LIBS"
+# LIBS="$LIBS -lprotoc -lprotobuf -lpthread"
+LIBS="$LIBS $protobuf_libs"
+
+## [Romain] this does not work for me just now, ignoring
+## AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+## 	#include <google/protobuf/text_format.h>
+## 	#include <google/protobuf/compiler/command_line_interface.h>
+## 	]], [[
+## 	google::protobuf::TextFormat::Printer foo;
+## 	google::protobuf::compiler::CommandLineInterface bar;
+## 	]]
+## 	)],[],[AC_MSG_ERROR([ERROR: protobuf test program did not link, maybe add '-Llibdir' to LDFLAGS.])])
+#LIBS="$pb_savedlibs"
+
+## also check for minimum version
+AC_MSG_CHECKING([if ProtoBuf version >= 2.2.0])
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <google/protobuf/stubs/common.h>
+int main() {
+   if (GOOGLE_PROTOBUF_VERSION >= 2001000) {
+        exit (0);
+   } else {
+        exit(1);
+   }
+}
+]])],
+[pb_version_ok=yes],
+[pb_version_ok=no],
+[pb_version_ok=yes])
+if test x"${pb_version_ok}" == x"no"; then
+  AC_MSG_ERROR([Need ProtoBuf version >= 2.2.0])
+else
+  AC_MSG_RESULT([yes])
+fi
+
+AC_DEFUN([AC_PROG_R], [AC_CHECK_PROG(R,R,yes)])
+AC_PROG_R
+
+## With thanks to Kurt
+: ${R_HOME=`R RHOME`}
+if test -z "${R_HOME}"; then
+    AC_MSG_ERROR([Could not determine R_HOME.])   
+fi
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
+
+# We need this to get some limited int64 support with Rcpp.
+if test "x$ax_cv_cxx_compile_cxx0x_cxx" = "xyes" ; then
+   CXXFLAGS="$CXXFLAGS -std=c++0x"
+fi
+
+## look for Rscript, but use the one found via R_HOME to allow for multiple installations
+AC_DEFUN([AC_PROG_RSCRIPT], [AC_CHECK_PROG(RSCRIPT,Rscript,yes)])
+AC_PROG_RSCRIPT
+if test x"${RSCRIPT}" == x"yes" ; then
+    ## link flag providing libary as well as path to library, and optionally rpath
+    rcpp_ldflags=`${R_HOME}/bin/Rscript -e 'Rcpp:::LdFlags()'`
+else
+    echo "
+  Your installation does not appear to have Rscript installed.
+
+  Please make sure that you have a working and complete R installation.
+"
+    exit 1
+fi
+
+## now use all these
+AC_SUBST([PKG_CPPFLAGS],["${PKG_CPPFLAGS} ${CXXFLAGS} $protobuf_cxxflags"])
+AC_SUBST([PKG_LIBS],["${PKG_LIBS} $rcpp_ldflags $protobuf_libs"])
+AC_SUBST([R_HOME],["${R_HOME}"])
+AC_CONFIG_FILES([src/Makevars])
+AC_OUTPUT
+echo "Completed configuration and ready to build."
+

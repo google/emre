@@ -12,7 +12,7 @@
 // limitations under the License.
 
 #include "memory_indexer.h"  // NOLINT
-#include "testing/base/public/gunit.h"
+#include "gtest/gtest.h"
 
 namespace {
 

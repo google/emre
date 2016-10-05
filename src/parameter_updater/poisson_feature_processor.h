@@ -51,7 +51,7 @@ class PoissonScaledFeatureProcessor : public PoissonFeatureProcessor {
   PoissonScaledFeatureProcessor() {}
   explicit PoissonScaledFeatureProcessor(IndexReader* index);
 
-  int GetStatsSize(int num_levels) {
+  int GetStatsSize(int num_levels) override {
     return aggregate_scaling_.size();
   }
 
@@ -92,9 +92,9 @@ class PoissonScaledFeatureProcessor : public PoissonFeatureProcessor {
 
   // The following hold mapping used to do an aggregation of the data.  See
   // scaled_feature_util.h and the design doc it links to for details.
-  vector<pair<int, int>> level_posn_size_;
+  std::vector<std::pair<int, int>> level_posn_size_;
   std::unique_ptr<VectorReader<int>> level_scaling_posn_;
-  vector<double> aggregate_scaling_;
+  std::vector<double> aggregate_scaling_;
 };
 
 class PoissonLogNormalFeatureProcessor : public PoissonScaledFeatureProcessor {
@@ -124,8 +124,8 @@ class PoissonLogNormalFeatureProcessor : public PoissonScaledFeatureProcessor {
 
   // The following hold mapping used to do an aggregation of the data.  See
   // scaled_feature_util.h and the design doc it links to for details.
-  vector<pair<int, int>> trivial_level_posn_size_;
-  vector<double> trivial_aggregate_scaling_;
+  std::vector<std::pair<int, int>> trivial_level_posn_size_;
+  std::vector<double> trivial_aggregate_scaling_;
 };
 
 }  // namespace emre

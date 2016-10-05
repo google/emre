@@ -23,11 +23,11 @@ namespace emre {
 
 class MemoryIndexBuilder : public VectorIndexBuilder {
  public:
-  explicit MemoryIndexBuilder(const string& feature_family,
+  explicit MemoryIndexBuilder(const std::string& feature_family,
                               int size_hint = 0)
       : VectorIndexBuilder(feature_family,
                            new MemoryVectorBuilderInt32(),
-                           new MemoryVectorBuilder<string>(),
+                           new MemoryVectorBuilder<std::string>(),
                            new MemoryVectorBuilder<int64>(),
                            new MemoryVectorBuilder<double>()) {}
 
@@ -46,7 +46,7 @@ class MemoryIndexReader : public VectorIndexReader {
     }
     if (index->str_level_map_reader_ != nullptr) {
       str_level_map_reader_.reset(
-          new MemoryVectorReader<string>(index->str_level_map_reader_.get()));
+          new MemoryVectorReader<std::string>(index->str_level_map_reader_.get()));
       str_level_map_itr_ = str_level_map_reader_->GetIterator();
     }
     if (index->int64_level_map_reader_ != nullptr) {

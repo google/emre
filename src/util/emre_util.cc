@@ -14,7 +14,7 @@
 #include "emre_util.h"  // NOLINT
 
 #include <assert.h>
-#include <algorithm>
+#include <math.h>
 
 namespace emre {
 namespace util {

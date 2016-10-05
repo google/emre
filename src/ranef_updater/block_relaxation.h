@@ -31,7 +31,7 @@
 #define EMRE_RANEF_UPDATER_BLOCK_RELAXATION_H_
 
 #include "parameter_updater/update_processor.h"
-#include "training_data.proto.h"
+#include "training_data.pb.h"
 #include "util/arrayslice.h"
 #include "util/distribution.h"
 

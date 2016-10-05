@@ -5,13 +5,13 @@ ranef.updater.module <- Module("mod_ranef_updater",
 
 .onLoad <- function(lib, pkg) {
   # Automatically load shared libraries
-  nativesupport::LoadNativeExtension("_indexer_utils", pkg, lib,
-                      "contentads/analysis/caa/search_plus/regmh/emre")
-  nativesupport::LoadNativeExtension("_ranef_updater", pkg, lib,
-                      "contentads/analysis/caa/search_plus/regmh/emre")
+  tryCatch(library.dynam("emre", pkg, lib),
+           error = function(e) {
+             stop(e)
+           })
   # Make sure that these protos are available
-  rglib::ReadProtoFilesFromResources(
-      "contentads/analysis/caa/search_plus/regmh/emre/src/training_data.proto")
+  #rglib::ReadProtoFilesFromResources(
+  #    "contentads/analysis/caa/search_plus/regmh/emre/src/training_data.proto")
 }
 
 EmreDebugPrint <- function(...) { }

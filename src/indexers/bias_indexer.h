@@ -30,7 +30,7 @@ class BiasIndexReader : public IndexReaderWithDefaultScaling {
 
   int GetNumObservations() const override { return num_observations_; }
 
-  const string GetFeatureFamily() const override;
+  const std::string GetFeatureFamily() const override;
 
   VectorReader<int32>::Iterator GetLevelIterator() override {
     return const_level_reader_.GetIterator();

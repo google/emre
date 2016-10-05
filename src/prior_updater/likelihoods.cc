@@ -13,7 +13,7 @@
 
 #include "likelihoods.h"  // NOLINT
 
-#include <algorithm>
+#include <math.h>
 #include "gsl/gsl_sf_gamma.h"
 
 namespace emre {

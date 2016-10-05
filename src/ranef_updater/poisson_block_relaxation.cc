@@ -15,6 +15,8 @@
 
 #include <math.h>
 
+#include "base/logging.h"
+
 namespace emre {
 
 using util::MutableArraySlice;

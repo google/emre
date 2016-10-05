@@ -40,6 +40,7 @@
 #ifndef EMRE_PRIOR_UPDATER_GAUSSIAN_PRIOR_OPTIMIZE_H_  // NOLINT
 #define EMRE_PRIOR_UPDATER_GAUSSIAN_PRIOR_OPTIMIZE_H_
 
+#include "base/logging.h"
 #include "gamma_prior_optimize.h"  // NOLINT
 
 namespace emre {

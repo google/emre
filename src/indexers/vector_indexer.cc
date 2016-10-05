@@ -15,7 +15,7 @@
 
 namespace emre {
 
-VectorIndexReader::VectorIndexReader(const string& feature_family,
+VectorIndexReader::VectorIndexReader(const std::string& feature_family,
                                      VectorReader<int32_t>* level_reader)
     : IndexReaderWithDefaultScaling(level_reader->Size()),
       feature_family_(feature_family),
@@ -29,9 +29,9 @@ void VectorIndexReader::FillFeatureLevel(FeatureData* data) {
   }
 }
 
-VectorIndexBuilder::VectorIndexBuilder(const string& feature_family,
+VectorIndexBuilder::VectorIndexBuilder(const std::string& feature_family,
                                        VectorBuilder<int32>* level_writer,
-                                       VectorBuilder<string>* str_map_writer,
+                                       VectorBuilder<std::string>* str_map_writer,
                                        VectorBuilder<int64>* int64_map_writer,
                                        VectorBuilder<double>* scaling_writer)
     : feature_family_(feature_family),
@@ -79,7 +79,7 @@ void VectorIndexBuilder::ProcessData(const FeatureData& data) {
     // we still need to process the potential scaling parameter
   } else if (data.HasStringValues(feature_family_)) {
     assert(int64_level_to_id_.empty());
-    const string& level = data.FeatureValue(feature_family_);
+    const std::string& level = data.FeatureValue(feature_family_);
     this->WriteLevelId(GetStrLevelId(level));
   } else {
     int64 level = data.FeatureValueInt64(feature_family_);

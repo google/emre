@@ -29,14 +29,14 @@ using util::MutableArraySlice;
 // static
 void ScaledFeatureUtil::MakeLevelScalingMapping(
     IndexReader* index,
-    vector<pair<int, int>>* level_posn_size,
+    std::vector<std::pair<int, int>>* level_posn_size,
     VectorBuilder<int>* level_scaling_posn,
-    vector<double>* aggregate_scaling) {
+    std::vector<double>* aggregate_scaling) {
 
   // First count the unique (level, scaling) pairs
   int max_level = -1;
   std::map<int, int> num_scaling_for_level;
-  std::map<pair<int, double>, int> unique_level_scaling;
+  std::map<std::pair<int, double>, int> unique_level_scaling;
 
   auto level_iter = index->GetLevelIterator();
   auto scaling_iter = index->GetScalingIterator();
@@ -52,11 +52,11 @@ void ScaledFeatureUtil::MakeLevelScalingMapping(
       if (it != num_scaling_for_level.end()) {
         scaling_index = it->second;
       }
-      auto lev_scaling = pair<int, double>(lev, scaling);
-      if (unique_level_scaling.insert(pair<pair<int, double>, int>(
+      auto lev_scaling = std::pair<int, double>(lev, scaling);
+      if (unique_level_scaling.insert(std::pair<std::pair<int, double>, int>(
           lev_scaling, scaling_index)).second) {
         auto ret = num_scaling_for_level.insert(
-            pair<int, int>(lev, scaling_index + 1));
+            std::pair<int, int>(lev, scaling_index + 1));
         if (!ret.second) {
           ret.first->second = scaling_index + 1;
         }
@@ -106,7 +106,7 @@ void ScaledFeatureUtil::MakeLevelScalingMapping(
       level_scaling_posn->Write(-1);
       continue;
     }
-    const pair<int, double> level_scaling(lev, scaling);
+    const std::pair<int, double> level_scaling(lev, scaling);
     const int posn = (*level_posn_size)[lev].first
                      + unique_level_scaling[level_scaling];
     level_scaling_posn->Write(posn);
@@ -197,20 +197,20 @@ void ScaledFeatureUtil::GaussianProposalMHPoissonUpdate(
     ArraySlice<double> p_events,
     ArraySlice<double> scores,
     ArraySlice<double> proposal_sds,
-    vector<double>* final_scores,
+    std::vector<double>* final_scores,
     MutableArraySlice<int> num_accept,
     util::random::Distribution* distn) {
-  vector<double> likelihoods(scores.size(), 0.0);
+  std::vector<double> likelihoods(scores.size(), 0.0);
   for (int i = 0; i < scores.size(); ++i) {
     likelihoods[i] = -0.5 * scores[i] * scores[i] * prior_inverse_variance;
   }
   ScaledFeatureUtil::GetDataLikelihoodsPoissonUpdate(
       index, events, scores, p_events, &likelihoods);
 
-  vector<double> current_scores(scores.size());
+  std::vector<double> current_scores(scores.size());
   std::copy(scores.begin(), scores.end(), current_scores.begin());
-  vector<double> proposal_likelihoods(scores.size(), 0.0);
-  vector<double> proposal_scores(scores.size(), 0.0);
+  std::vector<double> proposal_likelihoods(scores.size(), 0.0);
+  std::vector<double> proposal_scores(scores.size(), 0.0);
 
   for (int iter = 0; iter < num_steps; ++iter) {
     // Make the proposal and get the prior likelihood
@@ -241,7 +241,7 @@ void ScaledFeatureUtil::GaussianProposalMHPoissonUpdate(
 
 namespace poisson {
 ScaledFeatureMhProposer::ScaledFeatureMhProposer(
-    ArraySlice<pair<int, int>> level_posn_size,
+    ArraySlice<std::pair<int, int>> level_posn_size,
     ArraySlice<double> aggregate_scaling,
     ArraySlice<double> prediction,
     ArraySlice<double> events,
@@ -362,7 +362,7 @@ void ScaledFeatureRootSolver::InitializeBracket(double start) {
 
 ScaledFeatureLoglik::ScaledFeatureLoglik(
     double inverse_variance,
-    ArraySlice<pair<int, int>> level_posn_size,
+    ArraySlice<std::pair<int, int>> level_posn_size,
     ArraySlice<double> aggregate_scaling,
     ArraySlice<double> prediction,
     ArraySlice<double> events)

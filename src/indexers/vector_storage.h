@@ -89,9 +89,9 @@ class VectorReader {
     int size_;
     // The vector underlying vector_reader_, which can be used to speed up
     // iteration. Not available to all VectorReader subclasses.
-    const vector<T>* vec_;
+    const std::vector<T>* vec_;
     // Iterator of vec_. Also see comments in Next().
-    typename vector<T>::const_iterator vec_itr_;
+    typename std::vector<T>::const_iterator vec_itr_;
   };
 
   virtual ~VectorReader() {}
@@ -105,8 +105,8 @@ class VectorReader {
   }
 
   // For testing only.
-  vector<T> AsVectorForTesting() {
-    vector<T> v;
+  std::vector<T> AsVectorForTesting() {
+    std::vector<T> v;
     for (auto itr = this->GetIterator(); !itr.Done();) {
       v.push_back(itr.Next());
     }
@@ -120,7 +120,7 @@ class VectorReader {
   // Override this method when underlying storage can be cheaply and easily to
   // convert to vector. See comments in Iterator::Next() about why this is
   // needed.
-  virtual const vector<T>* AsVector() const { return nullptr; }
+  virtual const std::vector<T>* AsVector() const { return nullptr; }
   virtual void Reset() = 0;
   virtual T Next() = 0;  // returns the current value and increments the state
 
@@ -138,7 +138,7 @@ class ConstVectorReader : public VectorReader<T> {
   int Size() const override { return size_; }
 
  protected:
-  const vector<T>* AsVector() const override { return nullptr; }
+  const std::vector<T>* AsVector() const override { return nullptr; }
   void Reset() override {}
   T Next() override { return val_; }
 

@@ -38,8 +38,8 @@ class ScaledPoissonGibbsSampler : public ScaledPoissonOptimizer {
  private:
   // these values are hard coded for now!
   const int num_steps_per_iteration_;  //  number MH proposal steps.
-  vector<double> proposal_sds_;
-  vector<pair<int, int>> acceptance_counts_;
+  std::vector<double> proposal_sds_;
+  std::vector<std::pair<int, int>> acceptance_counts_;
 };
 
 }  // namespace emre

@@ -15,8 +15,9 @@
 #define EMRE_INDEXERS_FEATURE_INDEX_H_
 
 #include <algorithm>
-#include <unordered_map>
+#include <cassert>
 #include <string>
+#include <unordered_map>
 
 #include "base/integral_types.h"
 
@@ -28,16 +29,16 @@ class FeatureData {
  public:
   ~FeatureData() {}
 
-  bool HasFeature(const string& feature_name) const {
+  bool HasFeature(const std::string& feature_name) const {
     return (int64_features_.find(feature_name) != int64_features_.end())
         || (string_features_.find(feature_name) != string_features_.end());
   }
 
-  bool HasStringValues(const string& feature_name) const {
+  bool HasStringValues(const std::string& feature_name) const {
     return (string_features_.find(feature_name) != string_features_.end());
   }
 
-  void UnsetFeature(const string& feature_name) {
+  void UnsetFeature(const std::string& feature_name) {
     if (!HasFeature(feature_name)) {
       return;
     } else if (HasStringValues(feature_name)) {
@@ -53,19 +54,19 @@ class FeatureData {
     scaling_.clear();
   }
 
-  const string& FeatureValue(const string& feature_name) const {
+  const std::string& FeatureValue(const std::string& feature_name) const {
     auto it = string_features_.find(feature_name);
     assert(it != string_features_.end());
     return it->second;
   }
 
-  int64 FeatureValueInt64(const string& feature_name) const {
+  int64 FeatureValueInt64(const std::string& feature_name) const {
     auto it = int64_features_.find(feature_name);
     assert(it != int64_features_.end());
     return it->second;
   }
 
-  double FeatureScaling(const string& feature_name,
+  double FeatureScaling(const std::string& feature_name,
                         double default_value) const {
     auto it = scaling_.find(feature_name);
     if (it == scaling_.end()) {
@@ -74,27 +75,27 @@ class FeatureData {
     return it->second;
   }
 
-  void SetFeature(const string& feature_name,
-                  const string& feature_value) {
+  void SetFeature(const std::string& feature_name,
+                  const std::string& feature_value) {
     string_features_[feature_name] = feature_value;
   }
 
-  void SetFeatureWithScaling(const string& feature_name,
-                             const string& feature_value,
+  void SetFeatureWithScaling(const std::string& feature_name,
+                             const std::string& feature_value,
                              double scaling) {
     string_features_[feature_name] = feature_value;
     scaling_[feature_name] = scaling;
   }
 
-  void SetFeatureInt64(const string& feature_name,
+  void SetFeatureInt64(const std::string& feature_name,
                        int64 feature_value) {
     int64_features_[feature_name] = feature_value;
   }
 
  private:
-  std::unordered_map<string, int64> int64_features_;
-  std::unordered_map<string, string> string_features_;
-  std::unordered_map<string, double> scaling_;
+  std::unordered_map<std::string, int64> int64_features_;
+  std::unordered_map<std::string, std::string> string_features_;
+  std::unordered_map<std::string, double> scaling_;
 };
 
 }  // namespace emre

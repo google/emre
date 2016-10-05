@@ -29,8 +29,8 @@ LangevinMCMCProposer::LangevinMCMCProposer(
       distn_(distn), temp_vector_(dimension, 0.0) {}
 
 void LangevinMCMCProposer::GenerateProposal(
-    const vector<double>& from,
-    vector<double>* to,
+    const std::vector<double>& from,
+    std::vector<double>* to,
     double* proposal_llik) {
   CHECK_EQ(dimension_, from.size());
   CHECK_EQ(dimension_, to->size());
@@ -49,9 +49,9 @@ void LangevinMCMCProposer::GenerateProposal(
 }
 
 double LangevinMCMCProposer::ProposalLoglikForMhRatio(
-    const vector<double>& from,
-    const vector<double>& to) {
-  vector<double>* proposal_mean = &temp_vector_;
+    const std::vector<double>& from,
+    const std::vector<double>& to) {
+  std::vector<double>* proposal_mean = &temp_vector_;
   this->GetProposalMean(from, proposal_mean);
 
   double sum_squared = 0.0;  // holds sum of squared step sizes
@@ -62,8 +62,8 @@ double LangevinMCMCProposer::ProposalLoglikForMhRatio(
   return -0.5 * sum_squared * proposal_invvar_;
 }
 
-void LangevinMCMCProposer::GetProposalMean(const vector<double>& from,
-                                           vector<double>* proposal_mean) {
+void LangevinMCMCProposer::GetProposalMean(const std::vector<double>& from,
+                                           std::vector<double>* proposal_mean) {
   // After this call 'proposal_mean' holds the gradient of the log likelihood
   this->GetLlikGradient(from, proposal_mean);
 

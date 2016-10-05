@@ -11,18 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "bias_indexer.h"  // NOLINT
+#include "scaled_poisson_block_relaxation.h"  // NOLINT
+#include "testing/base/public/gunit.h"
 
 namespace emre {
 
-const char BiasIndexReader::kFeatureFamily[] = "__bias__";
-
-const std::string BiasIndexReader::GetFeatureFamily() const {
-  return BiasIndexReader::kFeatureFamily;
-}
-
-void BiasIndexReader::FillFeatureLevel(FeatureData* data) {
-  data->SetFeatureInt64(BiasIndexReader::kFeatureFamily, 0);
-}
+// TODO(kuehnelf): implement suitable tests
 
 }  // namespace emre

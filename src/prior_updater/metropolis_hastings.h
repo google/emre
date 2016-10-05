@@ -68,7 +68,7 @@ class SymmetricGaussianMhProposer : public MhProposer<double> {
 };
 
 
-class LangevinMCMCProposer : public MhProposer<vector<double>> {
+class LangevinMCMCProposer : public MhProposer<std::vector<double>> {
  public:
   // does not own 'distn'
   // 'prior' is used only for the locations of the grid points
@@ -78,22 +78,22 @@ class LangevinMCMCProposer : public MhProposer<vector<double>> {
 
   virtual ~LangevinMCMCProposer() {}
 
-  void GenerateProposal(const vector<double>& from,
-                        vector<double>* to,
+  void GenerateProposal(const std::vector<double>& from,
+                        std::vector<double>* to,
                         double* proposal_llik) override;
 
-  double ProposalLoglikForMhRatio(const vector<double>& from,
-                                  const vector<double>& to) override;
+  double ProposalLoglikForMhRatio(const std::vector<double>& from,
+                                  const std::vector<double>& to) override;
 
  protected:
   int GetDimension() const { return dimension_; }
   util::random::Distribution* GetRng() { return distn_; }
   virtual void GetLlikGradient(ArraySlice<double> from,
-                               vector<double>* gr) = 0;
+                               std::vector<double>* gr) = 0;
 
  private:
-  void GetProposalMean(const vector<double>& from,
-                       vector<double>* proposal_mean);
+  void GetProposalMean(const std::vector<double>& from,
+                       std::vector<double>* proposal_mean);
 
 
  private:
@@ -105,7 +105,7 @@ class LangevinMCMCProposer : public MhProposer<vector<double>> {
 
   // This pre-allocated vector is used to avoid repeated allocations during
   // calls to ProposalLoglikForMhRatio
-  vector<double> temp_vector_;
+  std::vector<double> temp_vector_;
 };
 
 
@@ -122,9 +122,9 @@ static T RunMetropolisHastings(
   // a) llik_cback.Evaluate() takes a vector as its argument
   // b) we use vector's swap function to swap the values without constructing
   //    a copy
-  vector<T> x = {initial_value};
-  vector<T> x_star = {initial_value};
-  vector<double> llik = {0.0};
+  std::vector<T> x = {initial_value};
+  std::vector<T> x_star = {initial_value};
+  std::vector<double> llik = {0.0};
   llik_cback.Evaluate(x, &llik);
   double x_llik = llik[0];
 

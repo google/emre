@@ -28,7 +28,7 @@
 #include "parameter_updater/update_processor.h"
 #include "prior_updater/prior_updater.h"
 #include "ranef_updater/block_relaxation.h"
-#include "training_data.proto.h"
+#include "training_data.pb.h"
 #include "util/distribution.h"
 
 // We export functions into R with lowercase and underscores.

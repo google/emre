@@ -13,8 +13,7 @@
 
 #include "vector_storage.h"  // NOLINT
 
-#include "testing/base/public/gmock.h"
-#include "testing/base/public/gunit.h"
+#include "gtest/gtest.h"
 
 using testing::Return;
 

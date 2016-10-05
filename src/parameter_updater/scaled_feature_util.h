@@ -49,9 +49,9 @@ class ScaledFeatureUtil {
   // aggregate_scaling[m] = scaling[i]
   static void MakeLevelScalingMapping(
       IndexReader* index,
-      vector<pair<int, int>>* level_posn_size,
+      std::vector<std::pair<int, int>>* level_posn_size,
       VectorBuilder<int>* level_scaling_posn,
-      vector<double>* aggregate_scaling);
+      std::vector<double>* aggregate_scaling);
 
   // Assumes that 'prediction' is already allocated and zero'ed out
   // 'scores' are in log-scale i.e. pconvs = exp(score) * offset
@@ -88,7 +88,7 @@ class ScaledFeatureUtil {
       util::ArraySlice<double> p_events,
       util::ArraySlice<double> scores,
       util::ArraySlice<double> proposal_sds,
-      vector<double>* final_scores,
+      std::vector<double>* final_scores,
       util::MutableArraySlice<int> num_accept,
       util::random::Distribution* distn);
 };
@@ -101,7 +101,7 @@ class ScaledFeatureMhProposer
   // nor aggregate scaling data.
  public:
   ScaledFeatureMhProposer(
-      util::ArraySlice<pair<int, int>> level_posn_size,
+      util::ArraySlice<std::pair<int, int>> level_posn_size,
       util::ArraySlice<double> aggregate_scaling,
       util::ArraySlice<double> prediction,
       util::ArraySlice<double> events,
@@ -131,7 +131,7 @@ class ScaledFeatureMhProposer
   }
 
  private:
-  util::ArraySlice<pair<int, int>> level_posn_size_;
+  util::ArraySlice<std::pair<int, int>> level_posn_size_;
   util::ArraySlice<double> aggregate_scaling_;
   util::ArraySlice<double> prediction_;
   util::ArraySlice<double> events_;
@@ -148,7 +148,7 @@ class ScaledFeatureLoglik
 
   ScaledFeatureLoglik(
       double inverse_variance,
-      util::ArraySlice<pair<int, int>> level_posn_size,
+      util::ArraySlice<std::pair<int, int>> level_posn_size,
       util::ArraySlice<double> aggregate_scaling,
       util::ArraySlice<double> prediction,
       util::ArraySlice<double> events);
@@ -168,7 +168,7 @@ class ScaledFeatureLoglik
   // first int points to index of a unique level in the flattened
   // unique level-scaling vector, second int is the number of unique scalings
   // for its level.
-  util::ArraySlice<pair<int, int>> level_posn_size_;
+  util::ArraySlice<std::pair<int, int>> level_posn_size_;
   // array of scaling for each unique level-scaling
   util::ArraySlice<double> aggregate_scaling_;
 

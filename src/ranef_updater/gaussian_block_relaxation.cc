@@ -15,6 +15,7 @@
 
 #include <math.h>
 
+#include "base/logging.h"
 #include "util/distribution.h"
 
 namespace emre {

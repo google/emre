@@ -28,7 +28,7 @@ class MutableArraySlice {
   MutableArraySlice(const MutableArraySlice& x, int pos, int len)
       : ptr_(x.ptr_ + pos), length_(len) {}
   MutableArraySlice(T* ptr, int length) : ptr_(ptr), length_(length) {}
-  MutableArraySlice(vector<val_type>* vec)
+  MutableArraySlice(std::vector<val_type>* vec)
       : ptr_(vec->data()), length_(vec->size()) {}
 
   int size() const { return length_; }
@@ -53,7 +53,7 @@ class ArraySlice {
       : ptr_(x.ptr_ + pos), length_(len) {}
   ArraySlice(const T* ptr, int length) : ptr_(ptr), length_(length) {}
 
-  ArraySlice(const vector<val_type>& vec)
+  ArraySlice(const std::vector<val_type>& vec)
       : ptr_(vec.data()), length_(vec.size()) {}
 
   ArraySlice(const MutableArraySlice<val_type>& V)

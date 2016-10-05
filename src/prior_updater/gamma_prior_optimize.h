@@ -32,7 +32,7 @@ class GammaPoissonPriorUpdater : public PriorUpdater {
       util::ArraySlice<double> stats_events,  // ancillary
       util::ArraySlice<double> stats_p_events,  // pass in the smoothed pred.
       util::ArraySlice<double> coefficients,
-      util::random::Distribution* rng) = 0;
+      util::random::Distribution* rng) override = 0;
 
   void SetProtoFromPrior(FeatureFamilyPrior* pb) const override;
   void SetPriorFromProto(const FeatureFamilyPrior& pb) override;
@@ -47,8 +47,8 @@ class GammaPoissonPriorUpdater : public PriorUpdater {
     return max_levels_for_update_;
   }
 
-  pair<double, double> GetGammaPrior() const {
-    return pair<double, double>(alpha_, beta_);
+  std::pair<double, double> GetGammaPrior() const {
+    return std::pair<double, double>(alpha_, beta_);
   }
 
  private:
@@ -148,17 +148,17 @@ class RealFunctionInLogSpace : public RealFunction {
 //
 // max_llik_delta should be non-negative and the function will check for this.
 
-pair<double, double> FindLikelihoodRangeForMCMC(
+std::pair<double, double> FindLikelihoodRangeForMCMC(
     const RealFunction& cback, double initial_value, int grid_size,
-    double max_llik_delta, const pair<double, double>& range);
+    double max_llik_delta, const std::pair<double, double>& range);
 
 
 // This function is exposed for testing purposes.
 void NonNegativeOptimize(const RealFunction& cback,
                          double initial_value,
                          int grid_size, int num_zoom,
-                         vector<double>* evaluation_points,
-                         vector<double>* values,
+                         std::vector<double>* evaluation_points,
+                         std::vector<double>* values,
                          int* max_index);
 
 

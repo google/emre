@@ -25,17 +25,17 @@ namespace emre {
 
 class VectorIndexReader : public IndexReaderWithDefaultScaling {
  private:
-  explicit VectorIndexReader(const string& feature_family, int num_rows)
+  explicit VectorIndexReader(const std::string& feature_family, int num_rows)
       : IndexReaderWithDefaultScaling(num_rows),
         feature_family_(feature_family) {}
 
  public:
-  VectorIndexReader(const string& feature_family,
+  VectorIndexReader(const std::string& feature_family,
                     VectorReader<int32>* level_reader);
 
   virtual ~VectorIndexReader() {}
 
-  int GetNumLevels() const {
+  int GetNumLevels() const override {
     if (str_level_map_reader_ == nullptr &&
         int64_level_map_reader_ == nullptr) {
       return 0;
@@ -45,7 +45,7 @@ class VectorIndexReader : public IndexReaderWithDefaultScaling {
     }
   }
 
-  const string GetFeatureFamily() const override { return feature_family_; }
+  const std::string GetFeatureFamily() const override { return feature_family_; }
 
   VectorReader<int32>::Iterator GetLevelIterator() override {
     return level_reader_->GetIterator();
@@ -86,30 +86,30 @@ class VectorIndexReader : public IndexReaderWithDefaultScaling {
   friend class MemoryIndexReader;  // MemoryIndexReader constructor needs access
   friend class VectorIndexBuilder;  // MoveToReader needs access to privates
 
-  const string feature_family_;
+  const std::string feature_family_;
   // Level reader
   std::unique_ptr<VectorReader<int32>> level_reader_;
   // Scaling reader
   std::unique_ptr<VectorReader<double>> scaling_reader_;
   // Fields to map ID to level. Vector index is ID.
   // Note: Only one field is used for a specific feature family.
-  std::unique_ptr<VectorReader<string>> str_level_map_reader_;
+  std::unique_ptr<VectorReader<std::string>> str_level_map_reader_;
   std::unique_ptr<VectorReader<int64>> int64_level_map_reader_;
   // Iterators for above two VectorReaders.
-  VectorReader<string>::Iterator str_level_map_itr_;
+  VectorReader<std::string>::Iterator str_level_map_itr_;
   VectorReader<int64>::Iterator int64_level_map_itr_;
 };
 
 class VectorIndexBuilder : public IndexBuilder {
  public:
-  VectorIndexBuilder(const string& feature_family,
+  VectorIndexBuilder(const std::string& feature_family,
                      VectorBuilder<int32>* level_writer,
-                     VectorBuilder<string>* str_level_map_writer,
+                     VectorBuilder<std::string>* str_level_map_writer,
                      VectorBuilder<int64>* int64_level_map_writer,
                      VectorBuilder<double>* scaling_writer);
   virtual ~VectorIndexBuilder() {}
 
-  const string GetFeatureFamily() const override { return feature_family_; }
+  const std::string GetFeatureFamily() const override { return feature_family_; }
 
   void ProcessData(const FeatureData& data) override;
 
@@ -125,7 +125,7 @@ class VectorIndexBuilder : public IndexBuilder {
     if (scaling_writer_.get() != nullptr) scaling_writer_->Write(scaling);
   }
 
-  int GetStrLevelId(const string& level) {
+  int GetStrLevelId(const std::string& level) {
     auto ret = str_level_to_id_.insert(std::make_pair(level, NextLevelId()));
     if (ret.second) {
       str_level_map_writer_->Write(level);
@@ -147,7 +147,7 @@ class VectorIndexBuilder : public IndexBuilder {
   }
 
  private:
-  const string feature_family_;
+  const std::string feature_family_;
 
   // Level writer
   std::unique_ptr<VectorBuilder<int32>> level_writer_;
@@ -157,8 +157,8 @@ class VectorIndexBuilder : public IndexBuilder {
   // Note: A specific feature family contains either string levels or int64
   // levels, so either str_level_to_id_ or int64_level_to_id_ is
   // used for a specific feature family.
-  std::unordered_map<string, int> str_level_to_id_;
-  std::unique_ptr<VectorBuilder<string>> str_level_map_writer_;
+  std::unordered_map<std::string, int> str_level_to_id_;
+  std::unique_ptr<VectorBuilder<std::string>> str_level_map_writer_;
   std::unordered_map<int64, int> int64_level_to_id_;
   std::unique_ptr<VectorBuilder<int64>> int64_level_map_writer_;
 };

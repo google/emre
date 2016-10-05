@@ -40,7 +40,7 @@ using Rcpp::IntegerVector;
 
 class FeatureIndexMemoryWriter {
  public:
-  explicit FeatureIndexMemoryWriter(const string& feature_family)
+  explicit FeatureIndexMemoryWriter(const std::string& feature_family)
       : feature_family_(feature_family),
         index_builder_(new MemoryIndexBuilder(feature_family)) {}
 
@@ -53,7 +53,7 @@ class FeatureIndexMemoryWriter {
       if (CharacterVector::is_na(*feat_iter)) {
         datum.SetFeature(kNAFeature, "");
       } else {
-        string level(*feat_iter);
+        std::string level(*feat_iter);
         datum.SetFeature(feature_family_, level);
       }
       index_builder_->ProcessData(datum);
@@ -73,7 +73,7 @@ class FeatureIndexMemoryWriter {
       if (CharacterVector::is_na(*feat_iter)) {
         datum.SetFeatureWithScaling(kNAFeature, "", kDefaultScaling);
       } else {
-        string level(*feat_iter);
+        std::string level(*feat_iter);
         datum.SetFeatureWithScaling(feature_family_, level, *scal_iter);
       }
       index_builder_->ProcessData(datum);
@@ -113,7 +113,7 @@ class FeatureIndexMemoryWriter {
   }
 
  private:
-  const string feature_family_;
+  const std::string feature_family_;
   std::unique_ptr<IndexBuilder> index_builder_;
 };
 
@@ -123,7 +123,7 @@ RcppExport SEXP get_string_levels(SEXP index_reader_ptr) {
 
   BEGIN_RCPP;
   const int num_levels = indexer->GetNumLevels();
-  const string family_name = indexer->GetFeatureFamily();
+  const std::string family_name = indexer->GetFeatureFamily();
   CharacterVector r(num_levels);
   FeatureData feature_data;
 
@@ -209,7 +209,7 @@ RcppExport SEXP create_bias_index_reader(SEXP num_observations) {
   Rcpp::XPtr<IndexReader> index_reader_ptr(
       new BiasIndexReader(n_obs), true);
   // the class attribute can be resovled in R with class(object)
-  index_reader_ptr.attr("class") = Rcpp::wrap(vector<string>
+  index_reader_ptr.attr("class") = Rcpp::wrap(std::vector<std::string>
       {"IndexReader", "BiasIndexReader"});
   return index_reader_ptr;
 }
@@ -221,7 +221,7 @@ RCPP_MODULE(mod_indexer_utils) {
 
   class_<FeatureIndexMemoryWriter>("FeatureIndexMemoryWriter")
 
-  .constructor<string>()
+  .constructor<std::string>()
   .method("write.string.features",
           &FeatureIndexMemoryWriter::WriteStringLevelFeatures)
   .method("write.scaled.string.features",

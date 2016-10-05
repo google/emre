@@ -30,7 +30,7 @@ class MemoryVectorReader : public VectorReader<T> {
  public:
   MemoryVectorReader() { iter_ = vec_.begin(); }
   // very convenient for unit testing
-  explicit MemoryVectorReader(const vector<T>& init_vec) {
+  explicit MemoryVectorReader(const std::vector<T>& init_vec) {
     vec_.resize(init_vec.size());
     std::copy(init_vec.begin(), init_vec.end(), vec_.begin());
     iter_ = vec_.begin();
@@ -49,7 +49,7 @@ class MemoryVectorReader : public VectorReader<T> {
   int Size() const override { return vec_.size(); }
 
  protected:
-  const vector<T>* AsVector() const override { return &vec_; }
+  const std::vector<T>* AsVector() const override { return &vec_; }
   void Reset() override { iter_ = vec_.begin(); }
   T Next() override { return *(iter_++); }
 
@@ -57,8 +57,8 @@ class MemoryVectorReader : public VectorReader<T> {
   friend class MemoryVectorBuilder<T>;
   friend class MemoryVectorBuilderInt32;
 
-  typename vector<T>::const_iterator iter_;
-  vector<T> vec_;
+  typename std::vector<T>::const_iterator iter_;
+  std::vector<T> vec_;
 };
 
 template<typename T>
@@ -68,7 +68,7 @@ class MemoryVectorBuilder : public VectorBuilder<T> {
 
   void Write(T x) override { return vec_.push_back(x); }
   void Finish() override {}
-  std::unique_ptr<VectorReader<T>> MoveToReader() {
+  std::unique_ptr<VectorReader<T>> MoveToReader() override {
     auto* reader = new MemoryVectorReader<T>();
     vec_.swap(reader->vec_);
     std::unique_ptr<VectorReader<T>> reader_ptr(reader);
@@ -77,7 +77,7 @@ class MemoryVectorBuilder : public VectorBuilder<T> {
   int Size() const override { return vec_.size(); }
 
  private:
-  vector<T> vec_;
+  std::vector<T> vec_;
 };
 
 template <typename T>
@@ -87,15 +87,15 @@ class CastedMemoryVectorReader : public VectorReader<int32> {
   int Size() const override { return vec_.size(); }
 
  protected:
-  const vector<int32>* AsVector() const override { return nullptr; }
+  const std::vector<int32>* AsVector() const override { return nullptr; }
   void Reset() override { iter_ = vec_.begin(); }
   int32 Next() override { return static_cast<int32>(*(iter_++)) - 1; }
 
  private:
   friend class MemoryVectorBuilderInt32;
 
-  typename vector<T>::const_iterator iter_;
-  vector<T> vec_;
+  typename std::vector<T>::const_iterator iter_;
+  std::vector<T> vec_;
 };
 
 class MemoryVectorBuilderInt32 : public VectorBuilder<int32> {
@@ -116,10 +116,10 @@ class MemoryVectorBuilderInt32 : public VectorBuilder<int32> {
   void UpgradeVector(int old_max_level, int new_max_level);
 
  private:
-  vector<int32> vec_int32_;
-  vector<uint16> vec_uint16_;
-  vector<uint8> vec_uint8_;
-  vector<bool> vec_bool_;
+  std::vector<int32> vec_int32_;
+  std::vector<uint16> vec_uint16_;
+  std::vector<uint8> vec_uint8_;
+  std::vector<bool> vec_bool_;
   int max_level_;
 };
 

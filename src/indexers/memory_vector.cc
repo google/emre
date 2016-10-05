@@ -28,14 +28,14 @@ void MemoryVectorBuilderInt32::UpgradeVector(int old_max, int new_max) {
     vec_uint8_.resize(vec_bool_.size());
     std::copy(vec_bool_.begin(), vec_bool_.end(), vec_uint8_.begin());
     // destroy vec_bool_
-    vector<bool> dummy;
+    std::vector<bool> dummy;
     vec_bool_.swap(dummy);
   }
   if (old_max <= kuint8max && new_max > kuint8max) {
     vec_uint16_.resize(vec_uint8_.size());
     std::copy(vec_uint8_.begin(), vec_uint8_.end(), vec_uint16_.begin());
     // destroy vec_uint8_
-    vector<uint8> dummy;
+    std::vector<uint8> dummy;
     vec_uint8_.swap(dummy);
   }
   if (old_max <= kuint16max && new_max > kuint16max) {
@@ -44,7 +44,7 @@ void MemoryVectorBuilderInt32::UpgradeVector(int old_max, int new_max) {
                    [](uint16 v) -> int32 {
                      return static_cast<int32>(v) - 1; });
     // destroy vec_uint16_
-    vector<uint16> dummy;
+    std::vector<uint16> dummy;
     vec_uint16_.swap(dummy);
   }
 }

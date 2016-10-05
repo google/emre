@@ -35,7 +35,7 @@ class IndexReader {
   virtual ~IndexReader() {}
 
   // The feature family this IndexReader handles.
-  virtual const string GetFeatureFamily() const = 0;
+  virtual const std::string GetFeatureFamily() const = 0;
 
   // Num of levels of the feature family.
   virtual int GetNumLevels() const = 0;
@@ -78,7 +78,7 @@ class IndexBuilder {
   virtual ~IndexBuilder() {}
 
   // The feature family that this IndexWriter handles.
-  virtual const string GetFeatureFamily() const = 0;
+  virtual const std::string GetFeatureFamily() const = 0;
 
   // Process one observation.
   virtual void ProcessData(const FeatureData& data) = 0;

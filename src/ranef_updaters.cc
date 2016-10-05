@@ -30,7 +30,7 @@
 #include "ranef_updater/scaled_poisson_block_relaxation.h"
 #include "util/arrayslice.h"
 #include "util/distribution.h"
-#include "net/proto2/public/text_format.h"
+#include "google/protobuf/text_format.h"
 
 // We export functions into R with lowercase and underscores.
 // The R API has corresponding camelcase functions.
@@ -58,7 +58,7 @@ RanefUpdater::RanefUpdater(
     SEXP index_reader_ptr) : indexer_(index_reader_ptr) {
   // set up update triple, priors and random number generator
   this->InitializeRandGenerator();
-  CHECK(proto2::TextFormat::ParseFromString(feature_family_prior_ascii_pb,
+  CHECK(google::protobuf::TextFormat::ParseFromString(feature_family_prior_ascii_pb,
                                             &prior_));
 
   // now set up the ranef updater
@@ -192,8 +192,8 @@ std::string RanefUpdater::GetRanefPrior() {
   ffp.set_prior_update_type(prior_.prior_update_type());
   ffp.set_ranef_update_type(prior_.ranef_update_type());
 
-  string ffp_str;
-  proto2::TextFormat::PrintToString(ffp, &ffp_str);
+  std::string ffp_str;
+  google::protobuf::TextFormat::PrintToString(ffp, &ffp_str);
   return ffp_str;
 }
 
@@ -248,7 +248,7 @@ ScaledPoissonRanefUpdater::ScaledPoissonRanefUpdater(
     SEXP index_reader_ptr) : RanefUpdater(index_reader_ptr) {
   // set up update triple, priors and random number generator
   this->InitializeRandGenerator();
-  CHECK(proto2::TextFormat::ParseFromString(feature_family_prior_ascii_pb,
+  CHECK(google::protobuf::TextFormat::ParseFromString(feature_family_prior_ascii_pb,
                                             &prior_));
   // set up the gaussian ranef updater here
   this->CreateRanefUpdaterTriple(prior_);
@@ -296,7 +296,7 @@ GaussianRanefUpdater::GaussianRanefUpdater(
     SEXP index_reader_ptr) : RanefUpdater(index_reader_ptr) {
   // set up update triple, priors and random number generator
   this->InitializeRandGenerator();
-  CHECK(proto2::TextFormat::ParseFromString(feature_family_prior_ascii_pb,
+  CHECK(google::protobuf::TextFormat::ParseFromString(feature_family_prior_ascii_pb,
                                             &prior_));
   // set up the gaussian ranef updater here
   this->CreateRanefUpdaterTriple(prior_);
@@ -363,9 +363,9 @@ RCPP_MODULE(mod_ranef_updater) {
 
   class_<ScaledPoissonRanefUpdater>("ScaledPoissonRanefUpdater")
   .derives<RanefUpdater>("RanefUpdater")
-  .constructor<string, SEXP>();
+  .constructor<std::string, SEXP>();
 
   class_<GaussianRanefUpdater>("GaussianRanefUpdater")
   .derives<RanefUpdater>("RanefUpdater")
-  .constructor<string, SEXP>();
+  .constructor<std::string, SEXP>();
 }

@@ -44,7 +44,7 @@ RealFunctionInLogSpace::~RealFunctionInLogSpace() {
 // Assumes that 'r' is non-NULL and has length at least that of 'x'
 void RealFunctionInLogSpace::Evaluate(ArraySlice<double> x,
                                       MutableArraySlice<double> r) const {
-  vector<double> exp_x_buffer(x.size(), 0.0);
+  std::vector<double> exp_x_buffer(x.size(), 0.0);
   std::transform(x.begin(), x.end(), exp_x_buffer.begin(), exp);
   cback_->Evaluate(exp_x_buffer, r);
 }
@@ -53,7 +53,7 @@ void RealFunctionInLogSpace::Evaluate(ArraySlice<double> x,
 class EmreParamLikelihoodRB : public RealFunction {
  public:
   EmreParamLikelihoodRB(
-      const pair<double, double>& prior,
+      const std::pair<double, double>& prior,
       ArraySlice<double> p_events,
       ArraySlice<double> events);
 
@@ -63,8 +63,8 @@ class EmreParamLikelihoodRB : public RealFunction {
                 MutableArraySlice<double> r) const override;
 
  private:
-  pair<double, double> model_prior_;
-  vector<pair<double, double>> posterior_mean_;
+  std::pair<double, double> model_prior_;
+  std::vector<std::pair<double, double>> posterior_mean_;
 };
 
 // This struct is used by NonNegativeOptimize to hold parameter values and
@@ -84,15 +84,15 @@ struct NonNegativeOptimizePair {
 void NonNegativeOptimize(const RealFunction& cback,
                          double initial_value,
                          int grid_size, int num_zoom,
-                         vector<double>* evaluation_points,
-                         vector<double>* values,
+                         std::vector<double>* evaluation_points,
+                         std::vector<double>* values,
                          int* max_index) {
   static const double kStepSize = 0.7;
 
-  vector<NonNegativeOptimizePair> evaluations;
+  std::vector<NonNegativeOptimizePair> evaluations;
 
   for (int zoom_idx = 0; zoom_idx < num_zoom; ++zoom_idx) {
-    vector<double> new_evaluation_points;
+    std::vector<double> new_evaluation_points;
     if (zoom_idx == 0) {
       const double scale = grid_size + 1 + (grid_size % 2);
 
@@ -129,7 +129,7 @@ void NonNegativeOptimize(const RealFunction& cback,
 
     CHECK_LT(0, new_evaluation_points.size());
 
-    vector<double> new_values(new_evaluation_points.size());
+    std::vector<double> new_values(new_evaluation_points.size());
     cback.Evaluate(new_evaluation_points, &new_values);
 
     for (int i = 0; i < new_evaluation_points.size(); ++i) {
@@ -159,10 +159,10 @@ void NonNegativeOptimize(const RealFunction& cback,
 namespace {
 
 double UpdateGammaPoissonVarianceEstimatesSample(
-    const pair<double, double>& prior, ArraySlice<double> samples,
+    const std::pair<double, double>& prior, ArraySlice<double> samples,
     int grid_size, int num_zoom) {
-  vector<double> gamma_params;
-  vector<double> likelihoods;
+  std::vector<double> gamma_params;
+  std::vector<double> likelihoods;
   int max_index = 0;
 
   EmreSampleParamLikelihood cback(samples);
@@ -172,7 +172,7 @@ double UpdateGammaPoissonVarianceEstimatesSample(
 }
 
 double SampleGammaPoissonVarianceEstimatesIntegrated(
-    const pair<double, double>& prior,
+    const std::pair<double, double>& prior,
     ArraySlice<double> p_events,
     ArraySlice<double> events,
     int grid_size, int num_steps, bool die_on_failure,
@@ -189,9 +189,9 @@ double SampleGammaPoissonVarianceEstimatesIntegrated(
   double proposal_sd = 0.0;
   const double log_current_prior = log(prior.second);
   for (int i = 0; i < 10; ++i) {
-    pair<double, double> search_range(log_current_prior - max_log_scaling,
-                                      log_current_prior + max_log_scaling);
-    pair<double, double> range = FindLikelihoodRangeForMCMC(
+    std::pair<double, double> search_range(log_current_prior - max_log_scaling,
+                                           log_current_prior + max_log_scaling);
+    std::pair<double, double> range = FindLikelihoodRangeForMCMC(
         logspace_llik, log_current_prior /* log_initial_value */,
         grid_size, 2.0 /* max_llik_delta */, search_range);
     proposal_sd = 0.5 * std::max(range.second - log_current_prior,
@@ -229,12 +229,12 @@ double SampleGammaPoissonVarianceEstimatesIntegrated(
 }
 
 double UpdateGammaPoissonVarianceEstimatesIntegrated(
-    const pair<double, double>& prior,
+    const std::pair<double, double>& prior,
     ArraySlice<double> p_events,
     ArraySlice<double> events,
     int grid_size, int num_zoom) {
-  vector<double> gamma_params;
-  vector<double> likelihoods;
+  std::vector<double> gamma_params;
+  std::vector<double> likelihoods;
   int max_index = 0;
 
   EmreParamIntegratedLikelihood cback(p_events, events);
@@ -244,12 +244,12 @@ double UpdateGammaPoissonVarianceEstimatesIntegrated(
 }
 
 double UpdateGammaPoissonVarianceEstimatesRB(
-    const pair<double, double>& prior,
+    const std::pair<double, double>& prior,
     ArraySlice<double> p_events,
     ArraySlice<double> events,
     int grid_size, int num_zoom) {
-  vector<double> gamma_params;
-  vector<double> likelihoods;
+  std::vector<double> gamma_params;
+  std::vector<double> likelihoods;
   int max_index = 0;
 
   EmreParamLikelihoodRB cback(prior, p_events, events);
@@ -273,15 +273,15 @@ double UpdateGammaPoissonVarianceEstimatesRB(
 //
 // max_llik_delta should be non-negative and the function will check for this.
 
-pair<double, double> FindLikelihoodRangeForMCMC(
+std::pair<double, double> FindLikelihoodRangeForMCMC(
     const RealFunction& cback, double initial_value, int grid_size,
-    double max_llik_delta, const pair<double, double>& range) {
+    double max_llik_delta, const std::pair<double, double>& range) {
   CHECK_GT(grid_size, 1);
   CHECK_GE(max_llik_delta, 0.0);
   CHECK_GE(range.second, range.first);
 
-  vector<double> new_evaluation_points = {initial_value};
-  vector<double> scalings = {0.0};
+  std::vector<double> new_evaluation_points = {initial_value};
+  std::vector<double> scalings = {0.0};
 
   const double step_size = ((range.second - range.first)
                             / static_cast<double>(grid_size - 1));
@@ -291,13 +291,13 @@ pair<double, double> FindLikelihoodRangeForMCMC(
     current_point += step_size;
   }
 
-  vector<double> new_values(new_evaluation_points.size());
+  std::vector<double> new_values(new_evaluation_points.size());
   cback.Evaluate(new_evaluation_points, &new_values);
 
   const double initial_llik = new_values[0];
   const double lb = initial_llik - max_llik_delta;
 
-  pair<double, double> final_range(initial_value, initial_value);
+  std::pair<double, double> final_range(initial_value, initial_value);
 
   // We skip i = 0 because this index held 'initial_value'.
   for (int i = 1; i < new_evaluation_points.size(); ++i) {
@@ -324,8 +324,8 @@ void GammaPoissonPriorIntegratedOptimize::UpdateVariance(
   CHECK_GE(stats_p_events.size(), num_levels);
   ArraySlice<double> p_events(stats_p_events, 0, num_levels);
   ArraySlice<double> events(stats_events, 0, num_levels);
-  vector<double> p_events_subset;
-  vector<double> events_subset;
+  std::vector<double> p_events_subset;
+  std::vector<double> events_subset;
 
   const int max_levels = this->GetMaxLevels();
   if (max_levels > 0 && max_levels < num_levels) {
@@ -415,12 +415,12 @@ void GammaPoissonPriorUpdater::SetPriorFromProto(const FeatureFamilyPrior& pb) {
 }
 
 EmreParamLikelihoodRB::EmreParamLikelihoodRB(
-    const pair<double, double>& prior,
+    const std::pair<double, double>& prior,
     ArraySlice<double> p_events,
     ArraySlice<double> events) {
   const int n_groups = events.size();
   model_prior_ = prior;
-  posterior_mean_.resize(n_groups, pair<double, double>(0.0, 0.0));
+  posterior_mean_.resize(n_groups, std::pair<double, double>(0.0, 0.0));
 
   for (int i = 0; i < n_groups; ++i) {
     const double alpha_posterior = model_prior_.first + events[i];
@@ -499,7 +499,7 @@ void EmreParamIntegratedLikelihood::Evaluate(
   // The values in the lookup table depend on the input 'x', so this cannot
   // be moved to the constructor
   static const int kNumElements = 10;
-  vector<double> lgamma_lookup_table(kNumElements * x.size(), 0.0);
+  std::vector<double> lgamma_lookup_table(kNumElements * x.size(), 0.0);
   EmreParamIntegratedLikelihood::FillLookupTable(
       x, &lgamma_lookup_table, kNumElements);
 

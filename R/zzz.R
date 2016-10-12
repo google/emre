@@ -1,7 +1,7 @@
 index.writer.module <- Module("mod_indexer_utils",
-                              PACKAGE = "_indexer_utils")
+                              PACKAGE = "emre")
 ranef.updater.module <- Module("mod_ranef_updater",
-                               PACKAGE = "_ranef_updater")
+                               PACKAGE = "emre")
 
 .onLoad <- function(lib, pkg) {
   # Automatically load shared libraries
@@ -10,8 +10,8 @@ ranef.updater.module <- Module("mod_ranef_updater",
              stop(e)
            })
   # Make sure that these protos are available
-  #rglib::ReadProtoFilesFromResources(
-  #    "contentads/analysis/caa/search_plus/regmh/emre/src/training_data.proto")
+  proto.dir <- system.file("data", package = "emre")
+  RProtoBuf::readProtoFiles(dir = proto.dir)
 }
 
 EmreDebugPrint <- function(...) { }

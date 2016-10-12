@@ -5,6 +5,12 @@
 FixefTerm <- R6Class("FixefTerm",
   inherit = BaseTerm,
   public = list(
+    print = function(...) {
+      cat("<FixefTerm> with\n", paste0(private$initial.prior),
+          "numeric.level: ", paste0(private$numeric.level),  sep = "")
+      invisible(self)
+    },
+
     add.data = function(data) {
       if (self$is.initialized()) {
         df <- private$create.data.frame(data)
@@ -180,6 +186,10 @@ OffsetTerm <- R6Class("OffsetTerm",
 
     add.data = function(data) {
       offset.data <- private$get.offset.data(data)
+      if (length(offset.data) < nrow(data)) {
+        # assuming 'data' is a data frame
+        offset.data <- rep(offset.data, nrow(data))[1:nrow(data)]
+      }
       self$offset.vec <- c(self$offset.vec, offset.data)
       return(offset.data)
     },

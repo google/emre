@@ -20,6 +20,10 @@ TestOffsetTermData <- function() {
   o4 <- OffsetTerm$new("offset(log(x*x))")
   vec4 <- AddData(o4, data.frame(x = 1:10))
   checkEqualsNumeric(vec4, 2 * log(1:10))
+
+  o5 <- OffsetTerm$new("offset(2.5)")
+  vec5 <- AddData(o5, data.frame(x = 1:10))
+  checkEqualsNumeric(vec5, rep(2.5, 10))
 }
 
 TestLogOffsetTermData <- function() {
@@ -35,6 +39,10 @@ TestLogOffsetTermData <- function() {
   o3 <- LogOffsetTerm$new("log.offset(log(x))")
   vec3 <- AddData(o3, data.frame(x = 2:11))
   checkEqualsNumeric(vec3, log(log(2:11)))
+
+  o4 <- LogOffsetTerm$new("log.offset(2.0)")
+  vec4 <- AddData(o4, data.frame(x = 2:11))
+  checkEqualsNumeric(vec4, rep(log(2.0), 10))
 }
 
 TestFixedEffectSingleFactorDataFrame <- function() {
@@ -82,4 +90,9 @@ TestGaussianNoiseVarianceDataFrame <- function() {
   g3 <- GaussianNoiseVarianceTerm$new("sd(log(x))")
   vec3 <- AddData(g3, df.in)
   checkEqualsNumeric(vec3, 1 / log(2:11)^2)
+
+  # constant standard dev term
+  g4 <- GaussianNoiseVarianceTerm$new("stddev(0.5)")
+  vec4 <- AddData(g4, df.in)
+  checkEqualsNumeric(vec4, 1 / rep(0.5^2, nrow(df.in)))
 }

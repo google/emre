@@ -66,6 +66,10 @@ GaussianNoiseVarianceTerm <- R6Class("GaussianNoiseVarianceTerm",
 
     add.data = function(data) {
       offset.data <- private$get.stddev.data(data)
+      if (length(offset.data) < nrow(data)) {
+        # assuming 'data' is a data frame
+        offset.data <- rep(offset.data, nrow(data))[1:nrow(data)]
+      }
       self$offset.vec <- c(self$offset.vec, offset.data)
       return(offset.data)
     },

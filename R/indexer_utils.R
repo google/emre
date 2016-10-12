@@ -18,7 +18,7 @@
   stopifnot(is.numeric(num.observations),
             num.observations > 0)
   return(.Call("create_bias_index_reader", num.observations,
-               PACKAGE = "_indexer_utils"))
+               PACKAGE = "emre"))
 }
 
 .IndexerWriteStringFeatures <- function(writer.handle, feature.levels,
@@ -53,7 +53,7 @@
   #   A character vector with the feature level names
   stopifnot(typeof(index.reader) == "externalptr",
             inherits(index.reader, "IndexReader"))
-  return(.Call("get_string_levels", index.reader, PACKAGE = "_indexer_utils"))
+  return(.Call("get_string_levels", index.reader, PACKAGE = "emre"))
 }
 
 .IndexerRowToLevelMap <- function(index.reader) {
@@ -65,7 +65,7 @@
   #   A integer vector with the feature level ids per observation (row)
   stopifnot(typeof(index.reader) == "externalptr",
             inherits(index.reader, "IndexReader"))
-  return(.Call("get_levelid_map", index.reader, PACKAGE = "_indexer_utils"))
+  return(.Call("get_levelid_map", index.reader, PACKAGE = "emre"))
 }
 
 .IndexerRowScaling <- function(index.reader) {
@@ -77,7 +77,7 @@
   #   A numeric vector with the scaling per observation (row)
   stopifnot(typeof(index.reader) == "externalptr",
             inherits(index.reader, "IndexReader"))
-  return(.Call("get_row_scaling", index.reader, PACKAGE = "_indexer_utils"))
+  return(.Call("get_row_scaling", index.reader, PACKAGE = "emre"))
 }
 
 .IndexerNumLevels <- function(index.reader) {
@@ -89,7 +89,7 @@
   #   The number of feature levels
   stopifnot(typeof(index.reader) == "externalptr",
             inherits(index.reader, "IndexReader"))
-  return(.Call("get_num_levels", index.reader, PACKAGE = "_indexer_utils"))
+  return(.Call("get_num_levels", index.reader, PACKAGE = "emre"))
 }
 
 .IndexerNumObservations <- function(index.reader) {
@@ -102,5 +102,5 @@
   stopifnot(typeof(index.reader) == "externalptr",
             inherits(index.reader, "IndexReader"))
   return(.Call("get_num_observations", index.reader,
-               PACKAGE = "_indexer_utils"))
+               PACKAGE = "emre"))
 }

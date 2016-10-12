@@ -132,9 +132,12 @@ ScaledRandomEffect <- R6Class("ScaledRandomEffect",
                                     offset = offset) {
       # TODO(kuehnelf):
       # we must take into account the unique level scaling map!
-      stop(paste("Poisson models only support formulas of the form '(1 | re)'.",
-                 "Terms of the form '(0+x|re)' will be supported",
-                 "in future versions."))
+      ff.name <- self$get.family.name()
+      stop(paste("Feature '", ff.name, "' is considered as a numeric one. ",
+                 "Currently, Poisson models don't support numeric features. ",
+                 "Formulas of the form '+ ", ff.name, " + ...' and ",
+                 "'(0+'", ff.name, "' |re) ' will be supported ",
+                 "in future versions.", sep = ""))
     },
 
     update.coefficients = function(p.events) {

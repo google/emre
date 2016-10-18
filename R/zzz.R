@@ -10,7 +10,7 @@ ranef.updater.module <- Module("mod_ranef_updater",
              stop(e)
            })
   # Make sure that these protos are available
-  proto.dir <- system.file("data", package = "emre")
+  proto.dir <- system.file("proto", package = "emre")
   RProtoBuf::readProtoFiles(dir = proto.dir)
 }
 

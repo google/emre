@@ -8,7 +8,7 @@ Maintainer: Frank Kuehnel <kuehnelf@google.com>
 Description: Large scale Gaussian & Poisson model fitting using Gibbs sampling.
 License: Apache 2
 LicenseNote: What?
-Depends: R (>= 2.15.1), Rcpp (>= 0.9.10), R6 (>= 2.1.2)
+Depends: R (>= 2.15.1), Rcpp (>= 0.9.10), R6 (>= 2.1.2), RProtoBuf (>= 0.4.6)
 LinkingTo: Rcpp
 Suggests: RUnit
 URL: https://github.com/google/emre
@@ -17,7 +17,6 @@ Collate:
   indexer_utils.R
   updaters.R
   misc_util.R
-  S3_interface.R
   formula_parsing.R
   random_effects.R
   optim_iterator.R

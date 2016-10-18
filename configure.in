@@ -1,0 +1,64 @@
+# -*- mode: autoconf; autoconf-indentation: 4; -*-
+#
+# emre configure.in by Frank Kuehnel <kuehnelf@google.com>
+# mostly based on RProtoBuf configure.in by Dirk Eddelbuettel <edd@debian.org>
+#
+# $Id$ require at least autoconf 2.61
+
+# require at least autoconf 2.61
+AC_PREREQ(2.61)
+
+# Process this file with autoconf to produce a configure script.
+AC_INIT([emre],[1.0.0])
+
+## simpler alternative to test below:  AC_PATH_PROG(PROTOC, protoc)
+
+AC_DEFUN([AC_PROG_PKGCONFIG], [AC_CHECK_PROG(PKGCONFIG,pkg-config,yes)])
+AC_PROG_PKGCONFIG
+
+## use pkg-config for ProtoBuf and gsl settings
+##
+if test x"${PKGCONFIG}" == x"yes"; then
+  if pkg-config --exists protobuf; then
+    protobuf_cxxflags=`pkg-config --cflags protobuf`
+    protobuf_libs=`pkg-config --libs protobuf`
+  else
+    protobuf_cxxflags=""
+    protobuf_libs="-lprotobuf"
+  fi
+  if pkg-config --exists gsl; then
+    gsl_cxxflags=`pkg-config --cflags gsl`
+    gsl_libs=`pkg-config --libs gsl`
+  else
+    gsl_cxxflags=""
+    gsl_libs="-lgsl"
+  fi
+else
+  # Add a reasonable default of -lprotobuf if we don't have pkg-config
+  protobuf_cxxflags=""
+  protobuf_libs="-lprotobuf"
+  gsl_cxxflags=""
+  gsl_libs="-lgsl"
+fi
+
+## And make sure these flags are used for the tests below.
+CPPFLAGS="${protobuf_cxxflags} ${CPPFLAGS}"
+CXXFLAGS="${protobuf_cxxflags} ${CXXFLAGS}"
+
+AC_DEFUN([AC_PROG_R], [AC_CHECK_PROG(R,R,yes)])
+AC_PROG_R
+
+## With thanks to Kurt
+: ${R_HOME=`R RHOME`}
+if test -z "${R_HOME}"; then
+    AC_MSG_ERROR([Could not determine R_HOME.])
+fi
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
+
+## now use all these
+AC_SUBST([PKG_CPPFLAGS],["${PKG_CPPFLAGS} ${CXXFLAGS} $protobuf_cxxflags"])
+AC_SUBST([PKG_LIBS],["${PKG_LIBS} $gsl_libs $protobuf_libs"])
+AC_SUBST([R_HOME],["${R_HOME}"])
+AC_CONFIG_FILES([src/Makevars])
+AC_OUTPUT
+echo "Completed configuration and ready to build."

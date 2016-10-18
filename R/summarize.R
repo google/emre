@@ -36,7 +36,7 @@
   return(selected.name)
 }
 
-GetFamilyNames.EMRE <- function(x) {
+GetFamilyNames <- function(x) {
   # Returns a vector of feature family names used in the model.
   #
   # Args:
@@ -47,10 +47,9 @@ GetFamilyNames.EMRE <- function(x) {
   stopifnot(inherits(x, "EMRE"), !is.null(x$optim.iterator))
   return(x$optim.iterator$get.feature.order())
 }
-setMethod("GetFamilyNames", signature = "EMRE", GetFamilyNames.EMRE)
 
-GetRanefs.EMRE <- function(x, family.name, start.iter = 0, end.iter = Inf,
-                           max.levels = Inf) {
+GetRanefs <- function(x, family.name, start.iter = 0, end.iter = Inf,
+                      max.levels = Inf) {
   # Returns a matrix of feature ranef coefficients (columns) for the requested
   # feature family. The dimension of the matrix is number of levels in this
   # feature family as number of columns and number of samples between
@@ -76,9 +75,8 @@ GetRanefs.EMRE <- function(x, family.name, start.iter = 0, end.iter = Inf,
 
   return(x$snapshots[[selected.name]][idx, 1:num.selected.levels, drop = F])
 }
-setMethod("GetRanefs", signature = "EMRE", GetRanefs.EMRE)
 
-GetPrior.EMRE <- function(x, family.name, start.iter = 0, end.iter = Inf) {
+GetPrior <- function(x, family.name, start.iter = 0, end.iter = Inf) {
   # Returns a list of FeatureFamilyPrior protos for the feature family
   # Args:
   #   x: an EMRE model object.
@@ -97,9 +95,8 @@ GetPrior.EMRE <- function(x, family.name, start.iter = 0, end.iter = Inf) {
   idx <- which(start.iter <= iters & iters <= end.iter)
   return(x$prior.snapshots[[selected.name]][idx])
 }
-setMethod("GetPrior", signature = "EMRE", GetPrior.EMRE)
 
-GetResidualVariance.EMRE <- function(x, start.iter = 0, end.iter = Inf) {
+GetResidualVariance <- function(x, start.iter = 0, end.iter = Inf) {
   # Returns a vector with residual variance samples for specified iterations
   # Args:
   #   x: a GaussianEMRE model object.
@@ -111,4 +108,3 @@ GetResidualVariance.EMRE <- function(x, start.iter = 0, end.iter = Inf) {
   idx <- which(start.iter <= iters & iters <= end.iter)
   return(1.0 / as.numeric(x$optim.iterator$residual.inv.var[idx]))
 }
-setMethod("GetResidualVariance", signature = "EMRE", GetResidualVariance.EMRE)

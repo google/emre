@@ -1,6 +1,6 @@
 TestInterceptOffsetAndRandomEffectsTerm <- function() {
   mdl <- PoissonEMRE()
-  mdl <- .ConstructPredictors(mdl, "1 + (1|w.2) + offset(1)")
+  mdl <- emre:::.ConstructPredictors(mdl, "1 + (1|w.2) + offset(1)")
   checkEquals(length(mdl$predictors), 3)
 
   checkEquals(names(mdl$predictors)[1], "InterceptTerm.1")
@@ -19,12 +19,12 @@ TestInterceptOffsetAndRandomEffectsTerm <- function() {
 
   checkEquals(names(mdl$predictors)[3], "OffsetTerm.3")
   # offset term must not construct a random effect
-  checkTrue(is.null(ConstructRandomEffect(mdl$predictors[[3]])))
+  checkTrue(is.null(emre:::ConstructRandomEffect(mdl$predictors[[3]])))
 }
 
 TestRandomEffectsOnlyTerm <- function() {
   mdl <- PoissonEMRE()
-  mdl <- .ConstructPredictors(mdl, "(1|x.1)")
+  mdl <- emre:::.ConstructPredictors(mdl, "(1|x.1)")
   checkEquals(length(mdl$predictors), 3)
 
   checkEquals(names(mdl$predictors)[1], "InterceptTerm.0")
@@ -37,12 +37,12 @@ TestRandomEffectsOnlyTerm <- function() {
 
   checkEquals(names(mdl$predictors)[3], "OffsetTerm.1000")
   # offset term must not construct a random effect
-  checkTrue(is.null(ConstructRandomEffect(mdl$predictors[[3]])))
+  checkTrue(is.null(emre:::ConstructRandomEffect(mdl$predictors[[3]])))
 }
 
 TestInterceptOnlyTerm <- function() {
   mdl <- PoissonEMRE()
-  mdl <- .ConstructPredictors(mdl, "1")
+  mdl <- emre:::.ConstructPredictors(mdl, "1")
   checkEquals(length(mdl$predictors), 2)
 
   checkEquals(names(mdl$predictors)[1], "InterceptTerm.1")
@@ -51,7 +51,7 @@ TestInterceptOnlyTerm <- function() {
 
 TestOffsetOnlyTerm <- function() {
   mdl <- PoissonEMRE()
-  mdl <- .ConstructPredictors(mdl, "offset(1)")
+  mdl <- emre:::.ConstructPredictors(mdl, "offset(1)")
   checkEquals(length(mdl$predictors), 2)
 
   checkEquals(names(mdl$predictors)[1], "InterceptTerm.0")

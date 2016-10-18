@@ -3,95 +3,95 @@
 # RunUnitTests().
 
 TestFixEfTerm <- function() {
-  f <- FixefTerm$new()
+  f <- emre:::FixefTerm$new()
   checkTrue(inherits(f, "FixefTerm"))
-  checkTrue(RecognizeTerm(f, "x"))
-  checkTrue(!RecognizeTerm(f, "(x"))
-  checkTrue(!RecognizeTerm(f, "offset(n)"))
-  checkTrue(!RecognizeTerm(f, "offset( log(n))"))
+  checkTrue(emre:::RecognizeTerm(f, "x"))
+  checkTrue(!emre:::RecognizeTerm(f, "(x"))
+  checkTrue(!emre:::RecognizeTerm(f, "offset(n)"))
+  checkTrue(!emre:::RecognizeTerm(f, "offset( log(n))"))
 }
 
 TestOffsetTerm <- function() {
-  o <- OffsetTerm$new()
+  o <- emre:::OffsetTerm$new()
   checkTrue(inherits(o, "OffsetTerm"))
-  checkTrue(RecognizeTerm(o, "offset(n)"))
-  checkTrue(RecognizeTerm(o, "offset( log(n))"))
-  checkTrue(RecognizeTerm(o, "offset( log(n) )"))
-  checkTrue(RecognizeTerm(o, "offset(1)"))
+  checkTrue(emre:::RecognizeTerm(o, "offset(n)"))
+  checkTrue(emre:::RecognizeTerm(o, "offset( log(n))"))
+  checkTrue(emre:::RecognizeTerm(o, "offset( log(n) )"))
+  checkTrue(emre:::RecognizeTerm(o, "offset(1)"))
   # unfortunately, regex doesn't deal with unbalanced paranthesis
-  checkTrue(RecognizeTerm(o, "offset( log(n)"))
+  checkTrue(emre:::RecognizeTerm(o, "offset( log(n)"))
   # checkFalse would be more appropriate
-  checkTrue(!RecognizeTerm(o, "offset"))
-  checkTrue(!RecognizeTerm(o, "offset (n)"))
-  checkTrue(!RecognizeTerm(o, "offset( n"))
+  checkTrue(!emre:::RecognizeTerm(o, "offset"))
+  checkTrue(!emre:::RecognizeTerm(o, "offset (n)"))
+  checkTrue(!emre:::RecognizeTerm(o, "offset( n"))
 }
 
 TestLogOffsetTerm <- function() {
-  o <- LogOffsetTerm$new()
+  o <- emre:::LogOffsetTerm$new()
   checkTrue(inherits(o, "OffsetTerm"))
-  checkTrue(RecognizeTerm(o, "log.offset(n)"))
-  checkTrue(RecognizeTerm(o, "log.offset( log(n))"))
-  checkTrue(RecognizeTerm(o, "log.offset( log(n) )"))
-  checkTrue(RecognizeTerm(o, "log.offset(1)"))
+  checkTrue(emre:::RecognizeTerm(o, "log.offset(n)"))
+  checkTrue(emre:::RecognizeTerm(o, "log.offset( log(n))"))
+  checkTrue(emre:::RecognizeTerm(o, "log.offset( log(n) )"))
+  checkTrue(emre:::RecognizeTerm(o, "log.offset(1)"))
   # unfortunately, regex doesn't deal with unbalanced paranthesis
-  checkTrue(RecognizeTerm(o, "log.offset( log(n)"))
+  checkTrue(emre:::RecognizeTerm(o, "log.offset( log(n)"))
   # checkFalse would be more appropriate
-  checkTrue(!RecognizeTerm(o, "offset(1)"))
-  checkTrue(!RecognizeTerm(o, "offset (n)"))
-  checkTrue(!RecognizeTerm(o, "offset( n"))
+  checkTrue(!emre:::RecognizeTerm(o, "offset(1)"))
+  checkTrue(!emre:::RecognizeTerm(o, "offset (n)"))
+  checkTrue(!emre:::RecognizeTerm(o, "offset( n"))
 }
 
 TestInterceptTerm <- function() {
-  i <- InterceptTerm$new()
+  i <- emre:::InterceptTerm$new()
   checkTrue(inherits(i, "InterceptTerm"))
-  checkTrue(RecognizeTerm(i, "0"))
-  checkTrue(RecognizeTerm(i, "1"))
+  checkTrue(emre:::RecognizeTerm(i, "0"))
+  checkTrue(emre:::RecognizeTerm(i, "1"))
   # checkFalse would be more appropriate
-  checkTrue(!RecognizeTerm(i, "2"))
-  checkTrue(!RecognizeTerm(i, "(1|x)"))
-  checkTrue(!RecognizeTerm(i, "(1)"))
+  checkTrue(!emre:::RecognizeTerm(i, "2"))
+  checkTrue(!emre:::RecognizeTerm(i, "(1|x)"))
+  checkTrue(!emre:::RecognizeTerm(i, "(1)"))
 }
 
 TestRandEffect <- function() {
-  r <- RanefTerm$new()
+  r <- emre:::RanefTerm$new()
   checkTrue(inherits(r, "RanefTerm"))
-  checkTrue(RecognizeTerm(r, "(1|x)"))
-  checkTrue(RecognizeTerm(r, "(1|x, sd = 0.5)"))
-  checkTrue(!RecognizeTerm(r, "(y|x)"))
-  checkTrue(!RecognizeTerm(r, "(1|1)"))
-  checkTrue(!RecognizeTerm(r, "(1| 1)"))
-  checkTrue(!RecognizeTerm(r, "(1|1, sd = 0.5)"))
-  checkTrue(RecognizeTerm(r, "(1|x:y)"))
+  checkTrue(emre:::RecognizeTerm(r, "(1|x)"))
+  checkTrue(emre:::RecognizeTerm(r, "(1|x, sd = 0.5)"))
+  checkTrue(!emre:::RecognizeTerm(r, "(y|x)"))
+  checkTrue(!emre:::RecognizeTerm(r, "(1|1)"))
+  checkTrue(!emre:::RecognizeTerm(r, "(1| 1)"))
+  checkTrue(!emre:::RecognizeTerm(r, "(1|1, sd = 0.5)"))
+  checkTrue(emre:::RecognizeTerm(r, "(1|x:y)"))
 }
 
 TestScaledRandEffect <- function() {
-  s <- ScaledPoissonTerm$new()
+  s <- emre:::ScaledPoissonTerm$new()
   checkTrue(inherits(s, "ScaledPoissonTerm"))
-  checkTrue(RecognizeTerm(s, "(y|x)"))
-  checkTrue(RecognizeTerm(s, "(y| 1 )"))
-  checkTrue(RecognizeTerm(s, "(y|1)"))
-  checkTrue(RecognizeTerm(s, "(y|1, sd = 0.5)"))
-  checkTrue(!RecognizeTerm(s, "(y x, sd = 0.5)"))
-  checkTrue(!RecognizeTerm(s, "(1|x)"))
-  checkTrue(!RecognizeTerm(s, "(1|1)"))
-  checkTrue(!RecognizeTerm(s, "(1| 1)"))
-  checkTrue(!RecognizeTerm(s, "(1|1, sd = 0.5)"))
+  checkTrue(emre:::RecognizeTerm(s, "(y|x)"))
+  checkTrue(emre:::RecognizeTerm(s, "(y| 1 )"))
+  checkTrue(emre:::RecognizeTerm(s, "(y|1)"))
+  checkTrue(emre:::RecognizeTerm(s, "(y|1, sd = 0.5)"))
+  checkTrue(!emre:::RecognizeTerm(s, "(y x, sd = 0.5)"))
+  checkTrue(!emre:::RecognizeTerm(s, "(1|x)"))
+  checkTrue(!emre:::RecognizeTerm(s, "(1|1)"))
+  checkTrue(!emre:::RecognizeTerm(s, "(1| 1)"))
+  checkTrue(!emre:::RecognizeTerm(s, "(1|1, sd = 0.5)"))
 }
 
 TestGaussianRandEffect <- function() {
-  g <- GaussianRanefTerm$new()
+  g <- emre:::GaussianRanefTerm$new()
   checkTrue(inherits(g, "GaussianRanefTerm"))
-  checkTrue(RecognizeTerm(g, "(1|x)"))
-  checkTrue(RecognizeTerm(g, "(1|x, sd = 0.3)"))
-  checkTrue(!RecognizeTerm(g, "(y|x)"))
-  checkTrue(RecognizeTerm(g, "(1|x:y)"))
+  checkTrue(emre:::RecognizeTerm(g, "(1|x)"))
+  checkTrue(emre:::RecognizeTerm(g, "(1|x, sd = 0.3)"))
+  checkTrue(!emre:::RecognizeTerm(g, "(y|x)"))
+  checkTrue(emre:::RecognizeTerm(g, "(1|x:y)"))
 }
 
 TestGaussianNoiseVariance <- function() {
-  g <- GaussianNoiseVarianceTerm$new()
+  g <- emre:::GaussianNoiseVarianceTerm$new()
   checkTrue(inherits(g, "GaussianNoiseVarianceTerm"))
-  checkTrue(RecognizeTerm(g, "stddev(n)"))
-  checkTrue(RecognizeTerm(g, "sd(n)"))
-  checkTrue(!RecognizeTerm(g, "offset(n)"))
+  checkTrue(emre:::RecognizeTerm(g, "stddev(n)"))
+  checkTrue(emre:::RecognizeTerm(g, "sd(n)"))
+  checkTrue(!emre:::RecognizeTerm(g, "offset(n)"))
 }
 

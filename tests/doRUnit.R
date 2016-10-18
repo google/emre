@@ -21,6 +21,7 @@ set.seed(42)
 ## Define tests
 testSuite <- defineTestSuite(name="emre Unit Tests",
                              dirs=system.file("unitTests", package = "emre"),
+                             testFileRegexp = "^.+_test\\.[rR]$",
                              testFuncRegexp = "^[Tt]est.+")
 
 ## Run tests

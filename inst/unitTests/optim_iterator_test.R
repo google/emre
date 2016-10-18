@@ -40,7 +40,7 @@ TestInitializeBiasRandomEffect <- function() {
   prior$feature_family <- "__bias__"
 
   # the index directory is ignored for the bias feature
-  bias.indexer <- .CreateBiasIndexReader(kNumObservations)
+  bias.indexer <- emre:::.CreateBiasIndexReader(kNumObservations)
   bias.ranef <- RandomEffect$new(prior, bias.indexer)
 
   checkEquals(bias.ranef$get.family.name(), "__bias__")
@@ -79,8 +79,8 @@ TestRandomEffect <- function() {
   prior$feature_family <- kFeatureFamily
 
   # construct indexer
-  index.writer <- .CreateIndexWriter(kFeatureFamily)
-  .IndexerWriteStringFeatures(index.writer, r$dat[["x.1"]])
+  index.writer <- emre:::.CreateIndexWriter(kFeatureFamily)
+  emre:::.IndexerWriteStringFeatures(index.writer, r$dat[["x.1"]])
   index.reader <- index.writer$close()
 
   # construct random effect

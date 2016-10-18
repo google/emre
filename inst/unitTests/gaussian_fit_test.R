@@ -45,8 +45,8 @@ TestGaussianRandomEffect <- function() {
   prior$feature_family <- kFeatureFamily
 
   # construct indexer
-  index.writer <- .CreateIndexWriter(kFeatureFamily)
-  .IndexerWriteStringFeatures(index.writer, r$dat[["x.1"]])
+  index.writer <- emre:::.CreateIndexWriter(kFeatureFamily)
+  emre:::.IndexerWriteStringFeatures(index.writer, r$dat[["x.1"]])
   index.reader <- index.writer$close()
 
   # construct gaussian random effect

@@ -6,8 +6,7 @@ Date: 2016-01-25
 Author: Frank Kuehnel <kuehnelf@google.com>, Nicholas Johnson <naj@google.com>
 Maintainer: Frank Kuehnel <kuehnelf@google.com>
 Description: Large scale Gaussian & Poisson model fitting using Gibbs sampling.
-License: Apache 2
-LicenseNote: What?
+License: Apache License 2.0
 Depends: R (>= 2.15.1), Rcpp (>= 0.9.10), R6 (>= 2.1.2), RProtoBuf (>= 0.4.6)
 LinkingTo: Rcpp
 Suggests: RUnit

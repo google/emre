@@ -587,6 +587,7 @@ R_HOME
 PKG_LIBS
 PKG_CPPFLAGS
 R
+GSL_CONFIG
 PKGCONFIG
 target_alias
 host_alias
@@ -1718,24 +1719,65 @@ if test x"${PKGCONFIG}" == x"yes"; then
     protobuf_cxxflags=""
     protobuf_libs="-lprotobuf"
   fi
-  if pkg-config --exists gsl; then
-    gsl_cxxflags=`pkg-config --cflags gsl`
-    gsl_libs=`pkg-config --libs gsl`
-  else
-    gsl_cxxflags=""
-    gsl_libs="-lgsl"
-  fi
 else
   # Add a reasonable default of -lprotobuf if we don't have pkg-config
   protobuf_cxxflags=""
   protobuf_libs="-lprotobuf"
-  gsl_cxxflags=""
-  gsl_libs="-lgsl"
 fi
 
 ## And make sure these flags are used for the tests below.
 CPPFLAGS="${protobuf_cxxflags} ${CPPFLAGS}"
 CXXFLAGS="${protobuf_cxxflags} ${CXXFLAGS}"
+
+## Check for non-standard programs: gsl-config(1)
+# Extract the first word of "gsl-config", so it can be a program name with args.
+set dummy gsl-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_GSL_CONFIG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $GSL_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_GSL_CONFIG="$GSL_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_GSL_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+GSL_CONFIG=$ac_cv_path_GSL_CONFIG
+if test -n "$GSL_CONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GSL_CONFIG" >&5
+$as_echo "$GSL_CONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+## If gsl-config was found, let’s use it
+if test "${GSL_CONFIG}" != ""; then
+  # Use gsl-config for header and linker arguments (without BLAS which we get from R)
+  gsl_cflags=`${GSL_CONFIG} --cflags`
+  gsl_libs=`${GSL_CONFIG} --libs-without-cblas`
+else
+  as_fn_error $? "gsl-config not found, is GSL installed?" "$LINENO" 5
+fi
 
 
 # Extract the first word of "R", so it can be a program name with args.
@@ -1783,7 +1825,7 @@ if test -z "${R_HOME}"; then
 fi
 CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
 
-## now use all these
+# Now substitute these variables in src/Makevars.in to create src/Makevars
 PKG_CPPFLAGS="${PKG_CPPFLAGS} ${CXXFLAGS} $protobuf_cxxflags"
 
 PKG_LIBS="${PKG_LIBS} $gsl_libs $protobuf_libs"

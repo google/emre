@@ -1,0 +1,17 @@
+Installation from source instructions for Mac:
+
+cd emre
+autoconf
+R CMD install --preclean emre
+
+Prerequisites:
+  0.) Installing Xcode
+  1.) Installing MacPorts
+  2.) Within R run "install.packages(c("R6", "RProtoBuf"))"
+  3.) sudo /opt/local/bin/port install pkgconfig autoconf gsl protobuf-cpp
+
+
+Caveats of this version:
+  Gaussian fixed effects models (LM type regressions) currently do not work correctly!
+
+  There is a low count bias for Poisson models that are not well understood.

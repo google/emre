@@ -89,6 +89,17 @@ RanefTerm <- R6Class("RanefTerm",
       return(paste(coef.fam, re.fam, sep = "__"))
     },
 
+    process.prior.args = function(args) {
+      EmreDebugPrint(paste("exiting process.prior.args:",
+                     sprintf("%s=%s", names(args), args)))
+      if ("sd" %in% names(args)) {
+        private$initial.prior$inverse_variance <- as.double(args)^(-2)
+      }
+      if ("var" %in% names(args)) {
+        private$initial.prior$inverse_variance <- as.double(args)^(-1)
+      }
+    },
+
     parse.term = function(formula.str, context = NULL) {
       # Parse a formula string of the form "(xxx|yyy)". The input string can
       # contain trailing terms. e.g. if "(xxx|yyy) + z", the " + z" will be
@@ -127,9 +138,11 @@ RanefTerm <- R6Class("RanefTerm",
                    "is not supported"))
       }
 
-      #x <- ProcessPriorArgs(x)
       # construct a canonical family name
       private$initial.prior$feature_family <- private$create.family.name()
+
+      # preset other parameters for this prior
+      private$process.prior.args(self$parser$args)
 
       # set the global choice for the update.mode
       if (!is.null(context)) {

@@ -61,12 +61,11 @@ OptimIterator <- R6Class("OptimIterator",
       return(llik)
     },
 
-    snapshot = function(iter, k, trace) {
+    snapshot = function(iter, trace) {
       # Method to keep track of fitting progress.
       #
       # Args:
       #   iter: iteration number
-      #   k: family index
       #   trace: named list for prior and ranef snapshots,
       #     If trace$prior.snapshots[[family.name]][[iter]] is defined
       #     then the FeatureFamilyPrior proto will be added to this list.
@@ -78,12 +77,12 @@ OptimIterator <- R6Class("OptimIterator",
 
       # take a prior snapshot
       if (!is.null(trace$prior.snapshots)) {
-        trace <- self$snapshot.prior(iter, k, trace)
+        trace <- self$snapshot.prior(iter, trace)
       }
 
       # take a ranef coefficient snapshot, snapshot[[feature.name]] is a matrix
       if (!is.null(trace$snapshots)) {
-        trace <- self$snapshot.coefficients(iter, k, trace)
+        trace <- self$snapshot.coefficients(iter, trace)
       }
 
       # trace llik as a way to diagnose convergence
@@ -94,7 +93,7 @@ OptimIterator <- R6Class("OptimIterator",
       return(trace)
     },
 
-    snapshot.coefficients = function(iter, k, trace) {
+    snapshot.coefficients = function(iter, trace) {
       for (nm in names(trace$snapshots)) {
         # find the families that need to be snapshotted at iteration
         if (paste0(iter) %in% rownames(trace$snapshots[[nm]])) {
@@ -113,7 +112,7 @@ OptimIterator <- R6Class("OptimIterator",
       return(trace)
     },
 
-    snapshot.prior = function(iter, k, trace) {
+    snapshot.prior = function(iter, trace) {
       for (nm in names(trace$prior.snapshots)) {
         # find the families that need to be snapshotted at iteration
         if (!is.null(trace$prior.snapshots[[nm]][[paste0(iter)]])) {
@@ -143,19 +142,14 @@ OptimIterator <- R6Class("OptimIterator",
         return(trace)
       }
 
+      trace <- self$snapshot(self$iter, trace)
       self$setup()
       for (k in seq_along(private$ranef.families)) {
-        trace <- self$snapshot(self$iter, k, trace)
         self$process.family(self$iter, k)
       }
       self$finish()
       self$iter <- self$iter + 1
 
-      if (self$is.done()) {
-        for (k in seq_along(private$ranef.families)) {
-          trace <- self$snapshot(self$iter, k, trace)
-        }
-      }
       return(trace)
     },
 
@@ -260,7 +254,7 @@ GaussOptimIterator <- R6Class("GaussOptimIterator",
 )
 
 .GenerateSnapshotSchedule <- function(start.snapshot, max.iter, freq) {
-  start.snapshot <- (floor(start.snapshot / freq) + 1) * freq
+  #start.snapshot <- (floor(start.snapshot / freq) + 1) * freq
 
   if (start.snapshot > max.iter) {
     return(c())
@@ -294,8 +288,8 @@ GaussOptimIterator <- R6Class("GaussOptimIterator",
       start.snapshot <- max(start.iter, mdl$setup$burnin)
       rownames <- .GenerateSnapshotSchedule(start.snapshot, max.iter, freq)
       if (length(rownames) == 0) next
-      # adjust the snapshot schedule by feature family index
-      rownames <- pmin(rownames + (k - 1), max.iter)
+      # take snapshot for all feature families at the same iteration
+      rownames <- unique(pmin(rownames, max.iter))
       colnames <- it$get.feature.levels(nm)
       if (mdl$setup$debug) {
         cat(sprintf("feature %s: start-end snapshot (%d-%d), freq. %d\n",

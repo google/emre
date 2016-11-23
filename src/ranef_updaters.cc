@@ -180,11 +180,13 @@ void RanefUpdater::UpdateRanefPrior(NumericVector coefficient_vec,
 
   updater_.prior_updater->UpdateVariance(ancillary, prediction,
                                          coefficients, random_dist_);
+  // important, update the global state prior consistently
+  updater_.prior_updater->SetProtoFromPrior(&prior_);
 }
 
 std::string RanefUpdater::GetRanefPrior() {
   FeatureFamilyPrior ffp;
-  // this only provides a partial fill of the proto bffer
+  // this only provides a partial fill of the proto buffer
   updater_.prior_updater->SetProtoFromPrior(&ffp);
   // we augment this information form prior_
   ffp.set_model_class_type(prior_.model_class_type());

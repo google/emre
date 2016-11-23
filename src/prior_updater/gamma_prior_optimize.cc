@@ -14,6 +14,7 @@
 #include "gamma_prior_optimize.h"  // NOLINT
 
 #include <algorithm>
+#include <numeric>
 
 #include "base/logging.h"
 #include "util/emre_util.h"
@@ -455,16 +456,20 @@ void EmreParamLikelihoodRB::Evaluate(
 void EmreSampleParamLikelihood::Evaluate(
     ArraySlice<double> x, MutableArraySlice<double> r) const {
   CHECK_GE(r.size(), x.size());
-  const double n_groups = this->GetSampleParams().size();
+  auto sample_param_vec = this->GetSampleParams();
+  const double n_groups = sample_param_vec.size();
   for (int i = 0; i < x.size(); ++i) {
     r[i] = n_groups * (x[i] * log(x[i]) - gsl_sf_lngamma(x[i]));
   }
-
-  for (auto sample_param : this->GetSampleParams()) {
-    const double log_sample_param = log(sample_param);
-    for (int i = 0; i < x.size(); ++i) {
-      r[i] += (x[i] - 1.0) * log_sample_param - x[i] * sample_param;
-    }
+  double sum_sample_param;
+  sum_sample_param = std::accumulate(sample_param_vec.begin(),
+    sample_param_vec.end(), 0.0);
+  double sum_log_sample_param;
+  sum_log_sample_param = std::accumulate(sample_param_vec.begin(),
+    sample_param_vec.end(), 0.0, [](double a, double b) {
+        return a + log(b); });
+  for (int i = 0; i < x.size(); ++i) {
+    r[i] += (x[i] - 1.0) * sum_log_sample_param - x[i] * sum_sample_param;
   }
 }
 

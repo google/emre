@@ -44,7 +44,7 @@ OptimIterator <- R6Class("OptimIterator",
       self$max.iter <- iter
     },
 
-    is.done = function() { return(self$iter > self$max.iter) },
+    is.done = function() { return(self$iter >= self$max.iter) },
 
     # this function is chainable
     add.ranef = function(x) {
@@ -149,6 +149,9 @@ OptimIterator <- R6Class("OptimIterator",
       }
       self$finish()
       self$iter <- self$iter + 1
+      if (self$is.done()) {
+        trace <- self$snapshot(self$iter, trace)
+      }
 
       return(trace)
     },

@@ -127,7 +127,6 @@ TestUpdateRanefPrior <- function() {
   group.sds <- c(0.2)
   coefficients <- rgamma(group.sizes[1], shape = group.sds[1]^(-2),
                          scale = group.sds[1]^2)
-  print(head(coefficients, 10))
   prediction <- rep(0, length(coefficients))
   events <- rep(0, length(coefficients))
   old.prior <- emre:::.GetRanefPrior(ranef.updater)

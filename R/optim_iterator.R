@@ -56,9 +56,13 @@ OptimIterator <- R6Class("OptimIterator",
     },
 
     calc.llik = function() {
-      # computes poisson log likelihood up to a constant
-      llik <- sum(private$response * log(self$p.events)) - sum(self$p.events)
-      return(llik)
+      if (length(self$p.events) > 0) {
+        # computes poisson log likelihood up to a constant
+        llik <- sum(private$response * log(self$p.events)) - sum(self$p.events)
+        return(llik)
+      } else {
+        return(NA)
+      }
     },
 
     snapshot = function(iter, trace) {
@@ -142,16 +146,16 @@ OptimIterator <- R6Class("OptimIterator",
         return(trace)
       }
 
-      trace <- self$snapshot(self$iter, trace)
+      if (self$iter == 0) {
+        trace <- self$snapshot(self$iter, trace)
+      }
       self$setup()
       for (k in seq_along(private$ranef.families)) {
         self$process.family(self$iter, k)
       }
       self$finish()
       self$iter <- self$iter + 1
-      if (self$is.done()) {
-        trace <- self$snapshot(self$iter, trace)
-      }
+      trace <- self$snapshot(self$iter, trace)
 
       return(trace)
     },
@@ -240,14 +244,18 @@ GaussOptimIterator <- R6Class("GaussOptimIterator",
     },
 
     calc.llik = function() {
-      # calculates gaussian llik up to a constant
-      error.term <- (private$response - self$p.events)
-      error.sqr <- sum(error.term * error.term * private$offset)
-      llik <- (-0.5) * error.sqr * self$residual.inv.var
-      llik <- llik - 0.5 * sum(log(private$offset))
-      M <- length(private$response)  # assumes data has not been aggregated
-      llik <- llik + 0.5 * M * sum(log(self$residual.inv.var))
-      return(llik)
+      if (length(self$p.events) > 0) {
+        # calculates gaussian llik up to a constant
+        error.term <- (private$response - self$p.events)
+        error.sqr <- sum(error.term * error.term * private$offset)
+        llik <- (-0.5) * error.sqr * self$residual.inv.var
+        llik <- llik - 0.5 * sum(log(private$offset))
+        M <- length(private$response)  # assumes data has not been aggregated
+        llik <- llik + 0.5 * M * sum(log(self$residual.inv.var))
+        return(llik)
+      } else {
+        return(NA)
+      }
     }
   ),
 
@@ -258,11 +266,10 @@ GaussOptimIterator <- R6Class("GaussOptimIterator",
 
 .GenerateSnapshotSchedule <- function(start.snapshot, max.iter, freq) {
   #start.snapshot <- (floor(start.snapshot / freq) + 1) * freq
-
   if (start.snapshot > max.iter) {
     return(c())
   } else {
-    return(seq(start.snapshot, max.iter, freq))
+    return(unique(c(seq(start.snapshot, max.iter, freq), max.iter)))
   }
 }
 
@@ -288,7 +295,12 @@ GaussOptimIterator <- R6Class("GaussOptimIterator",
     # TODO(kuehnelf): make snapshots configurable for each effect
     freq <- mdl$setup$thinning.interval
     if (freq > 0) {
-      start.snapshot <- max(start.iter, mdl$setup$burnin)
+      if (mdl$setup$burnin > 0) {
+        start.snapshot <- max(start.iter, mdl$setup$burnin + 1)
+      }
+      else {
+        start.snapshot <- start.iter
+      }
       rownames <- .GenerateSnapshotSchedule(start.snapshot, max.iter, freq)
       if (length(rownames) == 0) next
       # take snapshot for all feature families at the same iteration
@@ -327,17 +339,18 @@ GaussOptimIterator <- R6Class("GaussOptimIterator",
   mdl$prior.snapshots <- c(mdl$prior.snapshots, list())
   for (nm in names(trace$prior.snapshots)) {
     mdl$prior.snapshots[[nm]] <- c(mdl$prior.snapshots[[nm]],
-                                   trace$prior.snapshots[[nm]])
+                                   na.omit(trace$prior.snapshots[[nm]]))
   }
 
   # concatenate ranef snapshots
   mdl$snapshots <- c(mdl$snapshots, list())
   for (nm in names(trace$snapshots)) {
-    mdl$snapshots[[nm]] <- rbind(mdl$snapshots[[nm]], trace$snapshots[[nm]])
+    mdl$snapshots[[nm]] <- rbind(mdl$snapshots[[nm]],
+                                 na.omit(trace$snapshots[[nm]]))
   }
 
   # concatenate llik
-  mdl$llik <- c(mdl$llik, trace$llik)
+  mdl$llik <- c(mdl$llik, na.omit(trace$llik))
 
   # summarize fitted results
   mdl$fit <- list(last.iteration = it$iter)

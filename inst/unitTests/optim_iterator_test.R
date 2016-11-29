@@ -237,7 +237,7 @@ TestUpdateModesInSetupEMREoptim <- function() {
   }
 }
 
-TestFixedPriorMAPinInterleavedFit <- function() {
+TestFixedPriorMAPInterleavedFit <- function() {
   # Fits Ranef coefficients without fitting a prior
   kFamilyNames <- c("__bias__", "1__x.1", "1__x.2", "1__x.3")
   set.seed(15)
@@ -292,8 +292,8 @@ TestFixedPriorMAPinInterleavedFit <- function() {
     ranef.sr <- GetRanefs(mdl1.single.run, nm)
 
     checkEquals(colnames(ranef), colnames(ranef.sr))
-    checkEquals(rownames(ranef.sr), paste0(c(seq(20 + k - 1, 99, 10), 100)))
-    checkEquals(rownames(ranef), paste0(c(20 + k - 1, seq(30, 100, 10))))
+    checkEquals(rownames(ranef), rownames(ranef.sr))
+    checkEquals(rownames(ranef), paste0(seq(20, 100, 10)))
   }
 
   # check agreement between models
@@ -312,7 +312,7 @@ TestFixedPriorMAPinInterleavedFit <- function() {
   }
 }
 
-TestEmpiricalBayesInInterleavedFit <- function() {
+TestEmpiricalBayesInterleavedFit <- function() {
   # Fits a Gamma prior on simulated data.
   kFamilyNames <- c("__bias__", "x_1", "x_2", "x_3")
   set.seed(15)
@@ -362,7 +362,7 @@ TestEmpiricalBayesInInterleavedFit <- function() {
       x.3 = list(sd = c(0.4, 0.6)))
 
   # check model agreements
-  kTol <- 1e-2
+  kTol <- 2e-2
   for (nm in c("x.1", "x.2", "x.3")) {
     nm.mod <- paste0("1__", nm)
     x <- GetPrior(mdl1, nm.mod)[["100"]]
@@ -375,7 +375,7 @@ TestEmpiricalBayesInInterleavedFit <- function() {
                   nm, mdl1.prior.sd, mdl1.sr.prior.sd))
     rel.err <- abs(mdl1.prior.sd - mdl1.sr.prior.sd) /
                (mdl1.prior.sd + mdl1.sr.prior.sd)
-    checkTrue(max(rel.err) < kTol)
+    checkTrue(rel.err < kTol)
     checkTrue(mdl1.prior.sd >= kExpectedPriors[[nm]]$sd[1])
     checkTrue(mdl1.prior.sd <= kExpectedPriors[[nm]]$sd[2])
   }

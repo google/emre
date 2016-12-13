@@ -82,17 +82,27 @@ TestGaussianSetupEMREoptim <- function() {
 
   stopifnot(!is.null(mdl$optim.iterator))
   stopifnot(!is.null(mdl$setup$burnin))
+  checkTrue(!mdl$setup$residual.var)
 
   it <- mdl$optim.iterator  # short hand
   checkEquals(it$max.iter, 0)
 
   checkEquals(it$get.num.obs(), nrow(r$dat))
   checkEquals(it$get.num.levels("__bias__"), 1)
+  checkEquals(it$get.prior("__bias__")$mean, 0)
+  checkEquals(it$get.prior("__bias__")$inverse_variance, 1 / 5.0^2)
   checkTrue(!it$get.ranef("__bias__")$does.update.prior())
+
   checkEquals(it$get.num.levels("1__x.1"), 500)
+  checkEquals(it$get.prior("1__x.1")$mean, 0)
+  checkEquals(it$get.prior("1__x.1")$inverse_variance, 1 / 0.5^2)
   checkTrue(it$get.ranef("1__x.1")$does.update.prior())
+
   checkEquals(it$get.num.levels("1__x.2"), 700)
+  checkEquals(it$get.prior("1__x.2")$mean, 0)
+  checkEquals(it$get.prior("1__x.2")$inverse_variance, 1 / 0.2^2)
   checkTrue(it$get.ranef("1__x.2")$does.update.prior())
+
   checkEquals(it$get.num.levels("1__x.3"), 1000)
   checkTrue(it$get.ranef("1__x.3")$does.update.prior())
 
@@ -124,6 +134,39 @@ TestGaussianSetupEMREoptim <- function() {
       checkTrue(it$get.ranef(nm)$does.update.prior())
     }
   }
+}
+
+TestLMLikelihoodDiscreteFeatures <- function() {
+  set.seed(15)
+
+  frm <- data.frame(crashes = c(0, 20, 25, 25),
+                    exp.both = as.character(c(0, 0, 0, 1)),
+                    exp.one = as.character(c(0, 1, 1, 1)),
+                    binary = as.character(c(1, 1, 0, 0)))
+
+  last.iter <- 10
+  mdl <- SetupEMREoptim(
+      "crashes ~ 1 + exp.both + exp.one + binary + stddev(0.1)",
+      data = frm, model.constructor = GaussianEMRE,
+      update.mode = "empirical.bayes", burnin = 0, thinning.interval = 1)
+
+  print("fitting linear regression LM model:")
+  mdl <- FitEMRE(mdl, max.iter = last.iter, debug = TRUE)
+
+  bias <- GetRanefs(mdl, "__bias__", last.iter)
+  exp.both <- GetRanefs(mdl, "exp.both", last.iter)
+  exp.one <- GetRanefs(mdl, "exp.one", last.iter)
+  binary <- GetRanefs(mdl, "binary", last.iter)
+
+  # check whether the model predictions are close to the observation
+  checkEquals(0, bias[1] + exp.both[1, "0"] +
+                 exp.one[1, "0"] + binary[1, "1"], tolerance = 0.01)
+  checkEquals(20, bias[1] + exp.both[1, "0"] +
+                 exp.one[1, "1"] + binary[1, "1"], tolerance = 0.01)
+  checkEquals(25, bias[1] + exp.both[1, "0"] +
+                 exp.one[1, "1"] + binary[1, "0"], tolerance = 0.01)
+  checkEquals(25, bias[1] + exp.both[1, "1"] +
+                 exp.one[1, "1"] + binary[1, "0"], tolerance = 0.01)
 }
 
 TestFitGaussianFullBayes <- function() {
@@ -200,8 +243,10 @@ TestFitGaussianFullBayesResidualVariance <- function() {
   mdl <- SetupEMREoptim(
     "y ~ 1 + (1|x.1) + (1|x.2) + (1|x.3) + stddev(noise.sd)",
     data = r$dat, model.constructor = GaussianEMRE,
-    update.mode = "full.bayes", burnin = 20, thinning.interval = 5)
+    update.mode = "full.bayes", residual.var = TRUE,
+    burnin = 20, thinning.interval = 5)
 
+  checkTrue(mdl$setup$residual.var)
   # MCMC sample the prior variances
   print("fitting gauss-gauss model: full bayes")
   mdl <- FitEMRE(mdl, max.iter = 100, debug = TRUE)

@@ -47,6 +47,7 @@ GaussianEMRE <- function() {
   r <- PoissonEMRE()
   r$setup$iterator.class <- GaussOptimIterator
   r$model.family <- "gaussian"
+  r$setup["residual.var"] <- FALSE  # has option to estimate residual variance
   r$feature.constructors = list(
       InterceptTerm = GaussianInterceptTerm,
       RanefTerm = GaussianRanefTerm,

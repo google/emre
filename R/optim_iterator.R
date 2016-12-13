@@ -2,7 +2,8 @@ OptimIterator <- R6Class("OptimIterator",
   public = list(
     iter = NA,
     max.iter = NA,
-    p.events = c(),  # TODO(kuehnelf): rename to p.values (for gaussian model)
+    p.events = c(),
+    getprediction = function() self$p.events,
 
     # TODO(kuehnelf): maybe simplify API to pass in a named list
     initialize = function(response, offset, start.iter = 0,
@@ -33,7 +34,7 @@ OptimIterator <- R6Class("OptimIterator",
     },
 
     get.feature.order = function() { names(private$ranef.families) },
-    get.num.obs = function() { length(private$offset) },
+    get.num.obs = function() { length(private$response) },
     get.ranef = function(ff.name) { private$ranef.families[[paste0(ff.name)]] },
     set.start.iter = function(iter) {
       stopifnot(is.numeric(iter))
@@ -141,7 +142,7 @@ OptimIterator <- R6Class("OptimIterator",
     },
 
     # iterate over all feature families
-    iterate = function(trace = NULL) {
+    iterate = function(trace = NULL, debug = FALSE) {
       if (self$is.done()) {
         return(trace)
       }
@@ -151,7 +152,7 @@ OptimIterator <- R6Class("OptimIterator",
       }
       self$setup()
       for (k in seq_along(private$ranef.families)) {
-        self$process.family(self$iter, k)
+        self$process.family(self$iter, k, debug)
       }
       self$finish()
       self$iter <- self$iter + 1
@@ -170,14 +171,24 @@ OptimIterator <- R6Class("OptimIterator",
     },
 
     # go through all steps to update for a single feature family
-    process.family = function(iter, k) {
+    process.family = function(iter, k, debug) {
       ranef <- private$ranef.families[[k]]
-      ranef$collect.stats(self$p.events, private$offset)
+      if (debug) {
+        print(paste("process", ranef$get.family.name()))
+      }
+      ranef$collect.stats(self$getprediction(), private$getancilliary())
       if (self$update.prior(iter, k)) {
+        old_inv_var <- ranef$get.prior()$inverse_variance
+        old_mean <- ranef$get.prior()$mean
         ranef$update.prior()
+        if (debug) {
+          print(paste0("updated prior (", old_mean, ", ", old_inv_var,
+                       ") -> (", ranef$get.prior()$mean, ", ",
+                       ranef$get.prior()$inverse_variance, ")"))
+        }
       }
       if (self$update.coefficients(iter, k)) {
-        ranef$update.coefficients(self$p.events)
+        ranef$update.coefficients(self$getprediction())
       }
     }
 
@@ -185,7 +196,8 @@ OptimIterator <- R6Class("OptimIterator",
   private = list(
     offset = c(),  # unaggregated offset (Poisson model)
     response = c(),  # and response
-    ranef.families = list()
+    ranef.families = list(),
+    getancilliary = function() private$offset
   )
 )
 
@@ -193,11 +205,19 @@ GaussOptimIterator <- R6Class("GaussOptimIterator",
   inherit = OptimIterator,
   cloneable = FALSE,
   public = list(
+    p.values = c(),  # this is analogous to p.events for Poisson
     residual.inv.var = list("0" = 1.0),  # by default assume 0 start iteration
     prior.residual.inv.var = list(mean = 1.0, sd = 0.6),
+    getprediction = function() self$p.values,
 
-    initialize = function(..., context = NULL) {
+    initialize = function(response, inv.var, start.iter = 0,
+                          max.iter = 100, context = NULL) {
+      private$response <- response
+      private$inv.var <- inv.var
+      self$iter <- start.iter
+      self$max.iter <- max.iter
       if (!is.null(context)) {
+        private$est.residual.var <- context$residual.var
         if (context$update.mode == "full.bayes") {
           private$sample.variance <- TRUE
         } else if (context$update.mode == "empirical.bayes") {
@@ -207,7 +227,7 @@ GaussOptimIterator <- R6Class("GaussOptimIterator",
                     context$update.mode))
         }
       }
-      super$initialize(...)
+      EmreDebugPrint("GaussOptimIterator initialized")
     },
 
     # add the residual variance callback
@@ -218,38 +238,48 @@ GaussOptimIterator <- R6Class("GaussOptimIterator",
       super$add.ranef(x)
     },
 
+    # before an iteration starts
+    setup = function() {
+      self$p.values <- rep(0.0, length(private$response))
+      for (k in seq_along(private$ranef.families)) {
+        self$p.values <-
+            private$ranef.families[[k]]$add.to.prediction(self$p.values)
+      }
+    },
+
     # we'll draw samples from the posterior for the residual variance
     finish = function() {
-      # TODO(kuehnelf): change names p.events & offset to p.values & inv.var
-      error.term <- private$response - self$p.events
-      error.sqr <- sum(error.term * error.term * private$offset)
-      M <- length(private$response)  # assumes unaggregated data
-      p <- self$prior.residual.inv.var  # short hand
-      eta <- p$mean / (p$sd * p$sd)
-      theta <- p$mean * eta
-      new.residual.inv.var <-
-          ifelse(private$sample.variance,
-                 rgamma(1, shape = theta + M * 0.5,
-                        rate = eta + error.sqr * 0.5),
-                 (theta + M * 0.5 - 1) / (eta + error.sqr * 0.5))  # mode
-      EmreDebugPrint(sprintf("residual inv. variance %0.2f",
-                             new.residual.inv.var))
-      if (new.residual.inv.var <= 0) {
-        stop(paste("residual variance is infinite,",
-                   "cannot estimate residual variance."))
+      if (private$est.residual.var) {
+        error.term <- private$response - self$p.values
+        error.sqr <- sum(error.term * error.term * private$inv.var)
+        M <- self$get.num.obs()  # assumes unaggregated data
+        p <- self$prior.residual.inv.var  # short hand
+        eta <- p$mean / (p$sd * p$sd)
+        theta <- p$mean * eta
+        new.residual.inv.var <-
+            ifelse(private$sample.variance,
+                   rgamma(1, shape = theta + M * 0.5,
+                          rate = eta + error.sqr * 0.5),
+                   (theta + M * 0.5 - 1) / (eta + error.sqr * 0.5))  # mode
+        EmreDebugPrint(sprintf("residual inv. variance %0.2f",
+                               new.residual.inv.var))
+        if (new.residual.inv.var <= 0) {
+          stop(paste("residual variance is infinite,",
+                     "cannot estimate residual variance."))
+        }
+        tmp <- list(val = new.residual.inv.var)
+        names(tmp) <- paste0(self$iter + 1)  # +1 because this is called b. inc.
+        self$residual.inv.var <- c(self$residual.inv.var, tmp)
       }
-      tmp <- list(val = new.residual.inv.var)
-      names(tmp) <- paste0(self$iter + 1)  # +1 because this is called b. inc.
-      self$residual.inv.var <- c(self$residual.inv.var, tmp)
     },
 
     calc.llik = function() {
       if (length(self$p.events) > 0) {
         # calculates gaussian llik up to a constant
-        error.term <- (private$response - self$p.events)
-        error.sqr <- sum(error.term * error.term * private$offset)
+        error.term <- (private$response - self$p.values)
+        error.sqr <- sum(error.term * error.term * private$inv.var)
         llik <- (-0.5) * error.sqr * self$residual.inv.var
-        llik <- llik - 0.5 * sum(log(private$offset))
+        llik <- llik - 0.5 * sum(log(private$inv.var))
         M <- length(private$response)  # assumes data has not been aggregated
         llik <- llik + 0.5 * M * sum(log(self$residual.inv.var))
         return(llik)
@@ -260,7 +290,10 @@ GaussOptimIterator <- R6Class("GaussOptimIterator",
   ),
 
   private = list(
-    sample.variance = TRUE
+    inv.var = c(),  # empirical inverse variance per data row
+    sample.variance = TRUE,
+    est.residual.var = FALSE,
+    getancilliary = function() private$inv.var
   )
 )
 
@@ -332,7 +365,7 @@ GaussOptimIterator <- R6Class("GaussOptimIterator",
   # a simple main iteration loop
   while (!it$is.done()) {
     if (mdl$setup$debug) cat(sprintf("iteration %d\n", it$iter))
-    trace <- it$iterate(trace)
+    trace <- it$iterate(trace, mdl$setup$debug)
   }
 
   # concatenate prior snapshots

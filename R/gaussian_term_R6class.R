@@ -13,15 +13,21 @@ GaussianFixefTerm <- R6Class("GaussianFixefTerm",
       # Returns:
       #   R6 GaussianRandomEffect class or NULL
       EmreDebugPrint("Gaussian FixefTerm cref")
+      if (private$numeric.level) {
+        ranef.class <- ScaledGaussianRandomEffect
+      } else {
+        ranef.class <- GaussianRandomEffect
+      }
+      EmreDebugPrint(ranef.class)
       return(super$construct.random.effect(index.reader,
-                                           ranef.class = GaussianRandomEffect))
+                                           ranef.class = ranef.class))
     }
   ),
 
   private = list(
     init.prior = function() {
       super$init.prior()
-      kStdDev <- 0.5
+      kStdDev <- 5.0
       private$initial.prior$mean <- 0
       private$initial.prior$inverse_variance <- 1 / kStdDev^2
       private$initial.prior$model_class_type <- "GAUSSIAN"
@@ -50,6 +56,9 @@ GaussianInterceptTerm <- R6Class("GaussianInterceptTerm",
   private = list(
     init.prior = function() {
       super$init.prior()
+      kStdDev <- 5.0
+      private$initial.prior$mean <- 0
+      private$initial.prior$inverse_variance <- 1 / kStdDev^2
       private$initial.prior$model_class_type <- "GAUSSIAN"
     }
   )

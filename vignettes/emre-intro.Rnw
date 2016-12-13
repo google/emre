@@ -1,0 +1,96 @@
+\documentclass[11pt]{article}
+%\VignetteIndexEntry{emre-intro}
+%\VignetteEngine{knitr::knitr}
+%\VignetteKeywords{emre, GLM, Gibbs-sampling, Random effects, package}
+%\VignetteDepends{emre}
+
+\usepackage{url}
+\usepackage{color}
+\usepackage[colorlinks]{hyperref}
+\definecolor{link}{rgb}{0,0,0.3}
+\hypersetup{
+    colorlinks,%
+    citecolor=link,%
+    filecolor=link,%
+    linkcolor=link,%
+    urlcolor=link
+}
+\setlength{\oddsidemargin}{0pt}
+\setlength{\textwidth}{17cm} % uh-oh, I use letter :)
+\setcounter{tocdepth}{2}
+
+\usepackage{microtype}                     %% cf http://www.khirevich.com/latex/microtype/
+\usepackage[T1]{fontenc}       %% cf http://www.khirevich.com/latex/font/
+\usepackage[bitstream-charter]{mathdesign} %% cf http://www.khirevich.com/latex/font/
+
+<<echo=FALSE>>=
+library("emre")
+options("width"=65)
+emre.version <- packageDescription("emre")$Version
+prettyDate <- format(Sys.Date(), "%B %e, %Y")
+@
+% closing $ needed here
+
+\author{Frank Kuehnel \and Nicholas Johnston}
+\title{EMRE: Random Effects with Gibbs Sampling}
+\date{Version \Sexpr{emre.version} as of \Sexpr{prettyDate}}
+\begin{document}
+\maketitle
+
+\abstract{
+  \noindent
+  \textsl{EMRE} started as a Google internal software project and is also released under the Apache open source license. It provides an easy interface to build hierarchical Poisson and Gaussian regression models that is similar to the syntax used in the \textsl{lme4} package.
+
+  This vignette describes the version \Sexpr{emre.version} of
+  \textsl{EMRE} which enables building regression models on a single machine. The blocked Gibbs sampler algorithm is sufficiently scalable
+  to fit models where the data fits into a single machine memory.
+}
+
+%\tableofcontents
+
+\section{EMRE}
+A simple use case is linear regression, aka Gaussian regression model. \textsl{EMRE} uses a two step process to fit all models. Let's consider the following example data frame with three discrete factors:
+
+<<echo=FALSE>>=
+frm <- data.frame(crashes = c(0, 20, 25, 25),
+                  exp.both = c('a', 'a', 'a', 'b'),
+                  exp.one = c('a', 'b', 'b', 'b'),
+                  binary = c('b', 'b', 'a', 'a'))
+frm
+@
+
+We setup the regression formula and data processing with
+<<echo=TRUE,cache=TRUE>>=
+library(emre)
+mdl <- SetupEMREoptim(
+    "crashes ~ 1 + exp.both + exp.one + binary + stddev(0.1)",
+    data = frm, model.constructor = GaussianEMRE,
+    burnin = 0, thinning.interval = 1)
+@
+
+This does not actually accomplish the fit. To run the Gibbs sampler
+we use
+<<echo=TRUE,cache=TRUE>>=
+mdl <- FitEMRE(mdl, max.iter = 10, debug = FALSE)
+@
+
+We can evaluate the results of the last iteration, here the intercept or bias feature
+<<echo=TRUE>>=
+GetRanefs(mdl, "__bias__", 10)
+@
+
+or one of the other discrete factors over the course of all iterations
+<<echo=TRUE>>=
+GetRanefs(mdl, "binary")
+@
+
+To get all feature families we use this function
+<<echo=TRUE>>=
+GetFamilyNames(mdl)
+@
+
+\section{Extensions}
+
+\section{Acknowledgments}
+
+\end{document}

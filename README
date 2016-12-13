@@ -14,5 +14,9 @@ Prerequisites:
 To run unit tests
 R CMD batch tests/doRUnit.R
 
+To compile the vignette and produce a PDF
+cd vignettes
+R CMD Sweave --pdf emre-intro.Rnw
+
 Caveats of this version:
   Scaled Poisson models are currently not implemented

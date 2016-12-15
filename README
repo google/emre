@@ -15,7 +15,7 @@ Installation from source instructions for Linux (Ubuntu):
 
   Prerequisites:
     0.) Within R run "install.packages(c("R6", "RProtoBuf"))"
-    1.) sudo apt-get install libprotobuf protobuf-compiler libgsl0-dev
+    1.) sudo apt-get install libprotobuf-dev protobuf-compiler libgsl0-dev
 
   cd emre
   autoconf
@@ -26,4 +26,4 @@ To run unit tests
 R CMD batch tests/doRUnit.R
 
 Caveats of this version:
-  Scaled Poisson models are currently not implemented
+  Scaled Poisson / Gaussian models are currently not implemented

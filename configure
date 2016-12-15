@@ -583,11 +583,11 @@ PACKAGE_URL=''
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
-R_HOME
+PROTOC
 PKG_LIBS
 PKG_CPPFLAGS
-R
 GSL_CONFIG
+PROG_PROTOC
 PKGCONFIG
 target_alias
 host_alias
@@ -1716,13 +1716,57 @@ if test x"${PKGCONFIG}" == x"yes"; then
     protobuf_cxxflags=`pkg-config --cflags protobuf`
     protobuf_libs=`pkg-config --libs protobuf`
   else
-    protobuf_cxxflags=""
-    protobuf_libs="-lprotobuf"
+    as_fn_error $? "protobuf libraries not found, is protobuf installed?" "$LINENO" 5
   fi
 else
   # Add a reasonable default of -lprotobuf if we don't have pkg-config
   protobuf_cxxflags=""
   protobuf_libs="-lprotobuf"
+fi
+
+## look for protoc, the ProtoBuf compiler
+# Extract the first word of "protoc", so it can be a program name with args.
+set dummy protoc; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_PROG_PROTOC+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PROG_PROTOC in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PROG_PROTOC="$PROG_PROTOC" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_PROG_PROTOC="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+PROG_PROTOC=$ac_cv_path_PROG_PROTOC
+if test -n "$PROG_PROTOC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PROG_PROTOC" >&5
+$as_echo "$PROG_PROTOC" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+if test "${PROG_PROTOC}" == ""; then
+  as_fn_error $? "protoc not found, is Protobuf compiler installed?" "$LINENO" 5
 fi
 
 ## And make sure these flags are used for the tests below.
@@ -1772,65 +1816,18 @@ fi
 
 ## If gsl-config was found, let’s use it
 if test "${GSL_CONFIG}" != ""; then
-  # Use gsl-config for header and linker arguments (without BLAS which we get from R)
   gsl_cflags=`${GSL_CONFIG} --cflags`
-  gsl_libs=`${GSL_CONFIG} --libs-without-cblas`
+  gsl_libs=`${GSL_CONFIG} --libs`
 else
   as_fn_error $? "gsl-config not found, is GSL installed?" "$LINENO" 5
 fi
-
-
-# Extract the first word of "R", so it can be a program name with args.
-set dummy R; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_R+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$R"; then
-  ac_cv_prog_R="$R" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_R="yes"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-R=$ac_cv_prog_R
-if test -n "$R"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $R" >&5
-$as_echo "$R" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-
-## With thanks to Kurt
-: ${R_HOME=`R RHOME`}
-if test -z "${R_HOME}"; then
-    as_fn_error $? "Could not determine R_HOME." "$LINENO" 5
-fi
-CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
 
 # Now substitute these variables in src/Makevars.in to create src/Makevars
 PKG_CPPFLAGS="${PKG_CPPFLAGS} ${CXXFLAGS} $protobuf_cxxflags"
 
 PKG_LIBS="${PKG_LIBS} $gsl_libs $protobuf_libs"
 
-R_HOME="${R_HOME}"
+PROTOC="${PROG_PROTOC}"
 
 ac_config_files="$ac_config_files src/Makevars"
 

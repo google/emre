@@ -1,15 +1,26 @@
 Installation from source instructions for Mac:
 
-cd emre
-autoconf
-R CMD install --preclean emre
+  Prerequisites:
+    0.) Installing Xcode
+    1.) Installing MacPorts
+    2.) Within R run "install.packages(c("R6", "RProtoBuf"))"
+    3.) sudo /opt/local/bin/port install pkgconfig autoconf gsl protobuf-cpp
 
-Prerequisites:
-  0.) Installing Xcode
-  1.) Installing MacPorts
-  2.) Within R run "install.packages(c("R6", "RProtoBuf"))"
-  3.) sudo /opt/local/bin/port install pkgconfig autoconf gsl protobuf-cpp
+  cd emre
+  autoconf
+  cd ..
+  R CMD INSTALL --preclean emre
 
+Installation from source instructions for Linux (Ubuntu):
+
+  Prerequisites:
+    0.) Within R run "install.packages(c("R6", "RProtoBuf"))"
+    1.) sudo apt-get install libprotobuf protobuf-compiler libgsl0-dev
+
+  cd emre
+  autoconf
+  cd ..
+  R CMD INSTALL --preclean emre
 
 To run unit tests
 R CMD batch tests/doRUnit.R

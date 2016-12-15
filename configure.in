@@ -9,7 +9,7 @@
 AC_PREREQ(2.61)
 
 # Process this file with autoconf to produce a configure script.
-AC_INIT([emre],[1.0.0])
+AC_INIT([emre],[1.0.1])
 
 ## simpler alternative to test below:  AC_PATH_PROG(PROTOC, protoc)
 
@@ -23,13 +23,18 @@ if test x"${PKGCONFIG}" == x"yes"; then
     protobuf_cxxflags=`pkg-config --cflags protobuf`
     protobuf_libs=`pkg-config --libs protobuf`
   else
-    protobuf_cxxflags=""
-    protobuf_libs="-lprotobuf"
+    AC_MSG_ERROR([protobuf libraries not found, is libprotobuf-dev installed?])
   fi
 else
   # Add a reasonable default of -lprotobuf if we don't have pkg-config
   protobuf_cxxflags=""
   protobuf_libs="-lprotobuf"
+fi
+
+## look for protoc, the ProtoBuf compiler
+AC_PATH_PROG([PROG_PROTOC], [protoc])
+if test "${PROG_PROTOC}" == ""; then
+  AC_MSG_ERROR([protoc not found, is Protobuf compiler installed?])
 fi
 
 ## And make sure these flags are used for the tests below.
@@ -40,9 +45,8 @@ CXXFLAGS="${protobuf_cxxflags} ${CXXFLAGS}"
 AC_PATH_PROG([GSL_CONFIG], [gsl-config])
 ## If gsl-config was found, let’s use it
 if test "${GSL_CONFIG}" != ""; then
-  # Use gsl-config for header and linker arguments (without BLAS which we get from R)
   gsl_cflags=`${GSL_CONFIG} --cflags`
-  gsl_libs=`${GSL_CONFIG} --libs-without-cblas`
+  gsl_libs=`${GSL_CONFIG} --libs`
 else
   AC_MSG_ERROR([gsl-config not found, is GSL installed?])
 fi
@@ -50,6 +54,7 @@ fi
 # Now substitute these variables in src/Makevars.in to create src/Makevars
 AC_SUBST([PKG_CPPFLAGS],["${PKG_CPPFLAGS} ${CXXFLAGS} $protobuf_cxxflags"])
 AC_SUBST([PKG_LIBS],["${PKG_LIBS} $gsl_libs $protobuf_libs"])
+AC_SUBST([PROTOC],["${PROG_PROTOC}"])
 AC_CONFIG_FILES([src/Makevars])
 AC_OUTPUT
 echo "Completed configuration and ready to build."

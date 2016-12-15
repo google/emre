@@ -2,7 +2,7 @@
 
 rm -f config.* doRUnit.Rout src/Makedeps src/Makevars \
     src/*.o src/*.d src/*.a src/*.dll src/*.so src/*.rc */*~ *~ \
-    src/symbols.rds \
+    src/*.proto src/*.pb.cc src/*.pb.h src/symbols.rds \
     vignettes/emre*.aux vignettes/emre*.log \
     vignettes/emre*.out vignettes/emre*.toc \
     vignettes/emre*.tex vignettes/emre*.pdf

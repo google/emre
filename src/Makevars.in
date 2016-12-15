@@ -8,5 +8,19 @@ CXX_STD = CXX11
 PKG_CPPFLAGS = -I../src @PKG_CPPFLAGS@
 PKG_LIBS = @PKG_LIBS@
 
-SOURCES = $(wildcard base/*.cc indexers/*.cc parameter_updater/*.cc ranef_updater/*.cc prior_updater/*.cc util/*.cc)
-OBJECTS = indexer_utils.o ranef_updaters.o training_data.pb.o $(SOURCES:.cc=.o)
+PROTO_DIR = ../inst/proto
+PROTOS = $(wildcard $(PROTO_DIR)/*.proto)
+SOURCES = training_data.pb.cc $(wildcard base/*.cc indexers/*.cc parameter_updater/*.cc ranef_updater/*.cc prior_updater/*.cc util/*.cc)
+OBJECTS = $(SOURCES:.cc=.o) indexer_utils.o ranef_updaters.o
+
+all: $(OBJECTS)
+
+training_data.proto: $(PROTO_DIR)/training_data.proto
+
+$(PROTO_DIR)/%:
+	cp -f $< $@
+
+%.pb.cc: %.proto
+	cp ../inst/proto/$< $<
+	@PROTOC@ --cpp_out=. $<
+

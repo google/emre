@@ -13,6 +13,7 @@
 
 #include "emre_util.h"  // NOLINT
 
+#include <algorithm>
 #include <assert.h>
 #include <math.h>
 

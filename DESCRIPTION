@@ -25,3 +25,4 @@ Collate:
   gaussian_term_R6class.R
   emre.R
   summarize.R
+  predict.R

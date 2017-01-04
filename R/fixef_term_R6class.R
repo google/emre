@@ -184,8 +184,13 @@ OffsetTerm <- R6Class("OffsetTerm",
   public = list(
     offset.vec = c(),
 
+    print = function(...) {
+      cat("<OffsetTerm> with: ", private$offset.term, sep = "")
+      invisible(self)
+    },
+
     add.data = function(data) {
-      offset.data <- private$get.offset.data(data)
+      offset.data <- self$get.offset.data(data)
       if (length(offset.data) < nrow(data)) {
         # assuming 'data' is a data frame
         offset.data <- rep(offset.data, nrow(data))[1:nrow(data)]
@@ -199,15 +204,15 @@ OffsetTerm <- R6Class("OffsetTerm",
 
     recognize.term = function(formula.str) {
       return(length(grep(x = formula.str, pattern = "^offset\\(.*\\)$")) > 0)
+    },
+
+    get.offset.data = function(data) {
+      stopifnot(!is.na(private$offset.term))
+      return(eval(parse(text = private$offset.term), envir = data))
     }
   ),
 
   private = list(
-    get.offset.data = function(data) {
-      stopifnot(!is.na(private$offset.term))
-      return(eval(parse(text = private$offset.term), envir = data))
-    },
-
     parse.term = function(formula.str, context) {
       self$parser$str <- formula.str
       private$offset.term <- gsub("^offset\\((.*)\\)$", "\\1",

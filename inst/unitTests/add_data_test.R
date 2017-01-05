@@ -20,6 +20,10 @@ TestOffsetTermData <- function() {
   o4 <- emre:::OffsetTerm$new("offset(log(x*x))")
   vec4 <- emre:::AddData(o4, data.frame(x = 1:10))
   checkEqualsNumeric(vec4, 2 * log(1:10))
+
+  o5 <- emre:::OffsetTerm$new("offset(2.5)")
+  vec5 <- emre:::AddData(o5, data.frame(x = 1:10))
+  checkEqualsNumeric(vec5, rep(2.5, 10))
 }
 
 TestLogOffsetTermData <- function() {

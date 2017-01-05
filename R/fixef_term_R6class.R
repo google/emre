@@ -191,10 +191,6 @@ OffsetTerm <- R6Class("OffsetTerm",
 
     add.data = function(data) {
       offset.data <- self$get.offset.data(data)
-      if (length(offset.data) < nrow(data)) {
-        # assuming 'data' is a data frame
-        offset.data <- rep(offset.data, nrow(data))[1:nrow(data)]
-      }
       self$offset.vec <- c(self$offset.vec, offset.data)
       return(offset.data)
     },
@@ -208,7 +204,12 @@ OffsetTerm <- R6Class("OffsetTerm",
 
     get.offset.data = function(data) {
       stopifnot(!is.na(private$offset.term))
-      return(eval(parse(text = private$offset.term), envir = data))
+      offset.data <- eval(parse(text = private$offset.term), envir = data)
+      if (length(offset.data) < nrow(data)) {
+        # assuming 'data' is a data frame
+        offset.data <- rep(offset.data, nrow(data))[1:nrow(data)]
+      }
+      return(offset.data)
     }
   ),
 

@@ -286,9 +286,13 @@ ScaledGaussianRandomEffect <- R6Class("ScaledGaussianRandomEffect",
       self$cached.immutable.stats <- tapply(rivs, row2level.map, FUN = sum)
       invvar <- inverse.variance * scaling * scaling
       # this is what we call invvar in the paper
-      self$invvar.per.level <- tapply(inverse.variance, row2level.map,
-                                      FUN = sum)
+      self$invvar.per.level <- tapply(invvar, row2level.map, FUN = sum)
       return(self$cached.immutable.stats)
+    },
+
+    collect.stats = function(p.values, inverse.variance) {
+      scaling <- .IndexerRowScaling(.GetIndexReader(private$updater))
+      super$collect.stats(p.values, inverse.variance * scaling)
     }
   )
 )

@@ -26,4 +26,4 @@ To run unit tests
 R CMD batch tests/doRUnit.R
 
 Caveats of this version:
-  Scaled Poisson / Gaussian models are currently not implemented
+  Scaled Poisson models are currently not implemented

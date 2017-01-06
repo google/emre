@@ -1,8 +1,8 @@
 Package: emre
 Type: Package
 Title: Mixed Effects with blocked Gibbs sampling
-Version: 1.0.1
-Date: 2016-12-14
+Version: 1.0.2
+Date: 2017-01-06
 Author: Frank Kuehnel <kuehnelf@google.com>, Nicholas Johnson <naj@google.com>
 Maintainer: Frank Kuehnel <kuehnelf@google.com>
 Description: Large scale Gaussian & Poisson model fitting using Gibbs sampling.

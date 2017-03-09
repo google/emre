@@ -94,8 +94,8 @@ GaussianEMRE <- function() {
   # 2.) add an intercept term if there is none.
   num.offset <- length(grep(x = names(r), pattern = "^OffsetTerm\\.\\d+$"))
   if (num.offset == 0) {
-    EmreDebugPrint("adding implicit offset(1) term")
-    r <- c(r, list(OffsetTerm.1000 = fc$OffsetTerm$new("offset(1)")))
+    warning("adding implicit offset(1) or std(0.1) term")
+    r <- c(r, list(OffsetTerm.1000 = fc$OffsetTerm$new()))
   } else if (num.offset > 1) {
     stop(paste("Formula has more than one offset term:", formula.str))
   }

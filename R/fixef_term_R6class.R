@@ -184,6 +184,12 @@ OffsetTerm <- R6Class("OffsetTerm",
   public = list(
     offset.vec = c(),
 
+    initialize = function(formula.str = "offset(1)", context = NULL) {
+      if (self$recognize.term(formula.str)) {
+        private$parse.term(formula.str)
+      }
+    },
+
     add.data = function(data) {
       offset.data <- private$get.offset.data(data)
       if (length(offset.data) < nrow(data)) {

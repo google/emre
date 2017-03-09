@@ -5,6 +5,10 @@ TestInterceptTerm <- function() {
 }
 
 TestOffsetTermData <- function() {
+  o0 <- emre:::OffsetTerm$new()  # must initialize to offset(1)
+  vec0 <- emre:::AddData(o0, data.frame(x = 1:10))
+  checkEquals(vec0, rep(1, 10))
+
   o1 <- emre:::OffsetTerm$new("offset(x)")
   vec1 <- emre:::AddData(o1, data.frame(x = 1:10))
   checkEquals(vec1, 1:10)
@@ -69,6 +73,11 @@ TestFixedEffectCrossedScalarsDataFrame <- function() {
 }
 
 TestGaussianNoiseVarianceDataFrame <- function() {
+  g <- emre:::GaussianNoiseVarianceTerm$new()  # must initialize to sd(0.1)
+  df.in <- data.frame(x = 2:11)
+  vec <- emre:::AddData(g, df.in)
+  checkEqualsNumeric(vec, rep(100, 10))
+
   g <- emre:::GaussianNoiseVarianceTerm$new("stddev(x)")
   df.in <- data.frame(x = 2:11)
   vec <- emre:::AddData(g, df.in)
